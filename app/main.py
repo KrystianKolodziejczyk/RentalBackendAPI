@@ -4,7 +4,7 @@ from pydantic import BaseModel
 app = FastAPI()
 
 
-# Cars class - stworzone na poczet symbolicznego rozdzielenia odpowiedzialności
+# Cars class
 class Car:
     brand: str
     model: str
@@ -17,7 +17,6 @@ class Car:
 
 
 # Store Item class
-# Klasa z której tworzone są instancje samochodów + w której przypisywane jest ID do każdego utworzonego auta
 class StoreItem(Car):
     __id: int
 
@@ -32,34 +31,31 @@ class StoreItem(Car):
 
 # Storehouse Class
 class Storehouse:
-    # qty danego auta byłoby wyliczane w Storehouse na podstawie ilości wystąpien w StoreItem -- użyj metody listy count
     possesedCars: list
 
-    # (pojedyncza) instancja storehouse miałaby atrybut listy ze wszystkimi instancjami StoreItem (dziedziczącej po Car)
     def __init__(self) -> None:
         self.possesedCars = []
 
-    # UWAGA - najprawdopodobniej wyliczane i zwracane w handlerze, formatowane do listy JSONów poprzez respoonse model!!!
-    def calculate_each_car_qty(self):
-        pass
 
-
+# Rentend cars class
 class Rented:
-    # Każda jedna instancja będzie wypożyczonym samochodem -- wypożyczenie będzie modyfikowało "qty" konkretnego modelu, a status wypożyczenia będzie względem ID, a nie modelu
     def __init__(self, id: int, status: str):
         self.id = id
         self.status = status
 
 
+# Get response model
 class GetCarResponse(BaseModel):
     brand: str
     model: str
-    year: int  # Tu był błąd - pamiętaj na zawsze żeby sprawdzać
+    year: int
     id: int
 
 
+# Signletone instance
 storehouse = Storehouse()
 
+# Fake Database
 storehouse.possesedCars = [
     StoreItem(id=1, brand="BMW", model="M3", year=2019),
     StoreItem(id=2, brand="BMW", model="M3", year=2019),
@@ -77,11 +73,13 @@ storehouse.possesedCars = [
 ]
 
 
+# Gets all cars
 @app.get("/api/cars", status_code=200, response_model=list[GetCarResponse])
 async def get_all_cars() -> list[StoreItem]:
     return storehouse.possesedCars
 
 
+# Gets one car by ID
 @app.get("/api/cars/{car_id}", status_code=200, response_model=GetCarResponse)
 async def get_one_car(car_id: int):
     for car in storehouse.possesedCars:
@@ -89,11 +87,13 @@ async def get_one_car(car_id: int):
             return car
 
 
+# Adds new car
 @app.post("/api/cars")
 async def add_new_car():
     pass
 
 
+# deletes selected car
 @app.delete("/api/cars")
 async def delete_car():
     pass
