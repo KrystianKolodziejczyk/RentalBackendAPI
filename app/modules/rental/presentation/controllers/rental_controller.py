@@ -23,13 +23,13 @@ rentalService = RentalService(rental_repository=rentalRepository)
 
 app = FastAPI()
 
-# ===== Store Controller =======
+# ===== Store Controller ========
 
 # ===============================
 
 
 @app.get(
-    "/api/cars", status_code=status.HTTP_200_OK, response_model=list[GetCarResponse]
+    "/api/cars/all", status_code=status.HTTP_200_OK, response_model=list[GetCarResponse]
 )
 async def get_all_cars() -> list[Car]:
     return rentalService.get_all_cars()
@@ -39,7 +39,9 @@ async def get_all_cars() -> list[Car]:
 
 
 @app.get(
-    "/api/cars/count", status_code=status.HTTP_200_OK, response_model=CarsQtyResponse
+    "/api/cars/all/count",
+    status_code=status.HTTP_200_OK,
+    response_model=CarsQtyResponse,
 )
 async def get_all_cars_qty() -> dict[str, int]:
     allCarsQty: int = rentalService.get_all_cars_qty()
@@ -50,7 +52,9 @@ async def get_all_cars_qty() -> dict[str, int]:
 
 
 @app.get(
-    "/api/cars/{car_id}", status_code=status.HTTP_200_OK, response_model=GetCarResponse
+    "/api/cars/all/{car_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=GetCarResponse,
 )
 async def get_one_car(car_id: int) -> Car:
     return rentalService.get_car_by_id(car_id)
@@ -60,7 +64,9 @@ async def get_one_car(car_id: int) -> Car:
 
 
 @app.post(
-    "/api/cars", status_code=status.HTTP_201_CREATED, response_model=CreateCarResponse
+    "/api/cars/all",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CreateCarResponse,
 )
 async def add_new_car(carDTO: CreateCarDTO) -> dict[str, int]:
     NewCarId: int = rentalService.add_car(carDTO)
@@ -71,7 +77,7 @@ async def add_new_car(carDTO: CreateCarDTO) -> dict[str, int]:
 
 
 @app.delete(
-    "/api/cars/{car_id}",
+    "/api/cars/all/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=DeletCarResponse,
 )
@@ -84,7 +90,7 @@ async def delete_car(car_id: int):
 
 
 @app.get(
-    "/api/rented-cars",
+    "/api/cars/rented",
     status_code=status.HTTP_200_OK,
     response_model=list[GetCarResponse],
 )
@@ -96,7 +102,7 @@ async def get_available_cars() -> list[Car]:
 
 
 @app.get(
-    "/api/rented-cars/{car_id}",
+    "/api/cars/rented/check/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=CheckAvailableCarResponse,
 )
@@ -109,7 +115,7 @@ async def check_available_car(car_id: int) -> dict[str, str]:
 
 
 @app.patch(
-    "/api/rented-cars/rent-car/{car_id}",
+    "/api/cars/rented/rent/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=RentCarResponse,
 )
@@ -122,7 +128,7 @@ async def rent_car(car_id: int) -> dict[str, str]:
 
 
 @app.patch(
-    "/api/rented-cars/return-car/{car_id}",
+    "/api/cars/rented/return/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=RentCarResponse,
 )
