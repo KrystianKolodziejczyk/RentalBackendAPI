@@ -10,10 +10,3 @@ class StoreItem:
     def __init__(self, car: Car, status: RentStatusEnum):
         self.car = car
         self.status = status
-
-
-firstCar: StoreItem = StoreItem(
-    car=Car(brand="BMW", model="M4", year=2022), status=RentStatusEnum.AVAILABLE
-)
-
-print(firstCar.car.model)

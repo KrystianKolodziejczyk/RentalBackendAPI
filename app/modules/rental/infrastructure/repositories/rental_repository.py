@@ -7,26 +7,31 @@ from app.modules.rental.domain.repositories.i_rental_repository import IRentalRe
 # Storehouse Class
 class RentalRepository(IRentalRepository):
     ownedCars: list[StoreItem]
-    generalId: int = 0
+    generalId: int
 
     def __init__(self) -> None:
         self.ownedCars = []
-        self.generalId += 1
+        self.generalId = 0
 
     # Returns list of all instances
     def get_all_cars(self) -> list[StoreItem]:
         return self.ownedCars
 
     # Returns store's item instance
-    def get_car_by_id(self, item_id: int) -> StoreItem:
+    def get_car_by_id(self, car_id: int) -> StoreItem:
         for item in self.ownedCars:
-            if item.car.id == item_id:
+            if item.car.id == car_id:
                 return item
 
-    def add_car(self, car: Car) -> None:
-        self.ownedCars.append(StoreItem(car=car, status=RentStatusEnum.AVAILABLE))
+    def get_all_cars_qty(self) -> int:
+        return int(len(self.ownedCars))
 
-    def delete_car(self, car_id):
+    def add_car(self, car: Car) -> int:
+        newCar: StoreItem = StoreItem(car=car, status=RentStatusEnum.AVAILABLE)
+        self.ownedCars.append(newCar)
+        return newCar.car.id
+
+    def delete_car(self, car_id: int) -> bool:
         for item in self.ownedCars:
             if item.car.id == car_id:
                 self.ownedCars.remove(item)
@@ -36,13 +41,17 @@ class RentalRepository(IRentalRepository):
 
     def get_available_cars(self) -> list[StoreItem]:
         return [
-            item for item in self.ownedCars if item.status == RentStatusEnum.AVAILABLE
+            item.car
+            for item in self.ownedCars
+            if item.status == RentStatusEnum.AVAILABLE
         ]
 
-    def find_availabile_car_by_id(self, item_id) -> StoreItem:
+    def find_available_car(self, car_id) -> RentStatusEnum | bool:
         for item in self.ownedCars:
-            if item_id == item.car.id and item.status == RentStatusEnum.AVAILABLE:
-                return item
+            if car_id == item.car.id and item.status == RentStatusEnum.AVAILABLE:
+                return RentStatusEnum.AVAILABLE
 
-    def get_all_cars_qty(self):
-        return len(self.ownedCars)
+            elif car_id == item.car.id and item.status == RentStatusEnum.RENTED:
+                return RentStatusEnum.RENTED
+
+        return False
