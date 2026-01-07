@@ -4,7 +4,10 @@ from app.modules.rental.domain.models.store_item import StoreItem
 from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
 from app.modules.rental.domain.services.i_rental_service import IRentalService
 from app.modules.rental.domain.enums.rent_status_enum import RentStatusEnum
-from app.modules.rental.presentation.dto.create_car_dto import CreateCarDTO
+from app.modules.rental.presentation.dto import (
+    CreateCarDTO,
+    UpdateCarDTO,
+)
 
 
 class RentalService(IRentalService):
@@ -31,7 +34,7 @@ class RentalService(IRentalService):
         return self.rental_repository.get_all_cars_qty()
 
     # Adds new store item instance
-    def add_car(self, createCarDTO: CreateCarDTO) -> None:
+    def add_car(self, createCarDTO: CreateCarDTO) -> int:
         self.rental_repository.generalId += 1
         newId: int = self.rental_repository.generalId
 
@@ -51,6 +54,31 @@ class RentalService(IRentalService):
         result: bool = self.rental_repository.delete_car(car_id=car_id)
         if result:
             return car_id
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
+        )
+
+    # Updates selected car info
+    def update_car(
+        self,
+        car_id: int,
+        updateCarDTO: UpdateCarDTO,
+    ) -> int:
+        item: StoreItem = self.rental_repository.get_car_by_id(car_id=car_id)
+        if item:
+            if item.status == RentStatusEnum.RENTED:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="cant_change_rented_car!",
+                )
+
+            elif item.status == RentStatusEnum.AVAILABLE:
+                item.car.brand = updateCarDTO.brand
+                item.car.model = updateCarDTO.model
+                item.car.year = updateCarDTO.year
+
+                return car_id
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
@@ -77,7 +105,7 @@ class RentalService(IRentalService):
         )
 
     # Changes item's status to Rented
-    def rent_car(self, car_id: int) -> bool:
+    def rent_car(self, car_id: int) -> RentStatusEnum:
         item = self.rental_repository.get_car_by_id(car_id=car_id)
         if item:
             if item.status == RentStatusEnum.RENTED:
@@ -94,7 +122,7 @@ class RentalService(IRentalService):
             status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
         )
 
-    def return_car(self, car_id):
+    def return_car(self, car_id) -> RentStatusEnum:
         item = self.rental_repository.get_car_by_id(car_id=car_id)
         if item:
             if item.status == RentStatusEnum.AVAILABLE:

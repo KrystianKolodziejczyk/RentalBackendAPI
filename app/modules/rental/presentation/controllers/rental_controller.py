@@ -3,7 +3,7 @@ from fastapi import APIRouter, status, Depends
 from app.core.container import get_rental_service
 from app.modules.rental.domain.models.car import Car
 from app.modules.rental.domain.services.i_rental_service import IRentalService
-from app.modules.rental.presentation.dto import CreateCarDTO
+from app.modules.rental.presentation.dto import CreateCarDTO, UpdateCarDTO
 from app.modules.rental.presentation.response import (
     CreateCarResponse,
     CheckAvailableCarResponse,
@@ -11,6 +11,7 @@ from app.modules.rental.presentation.response import (
     DeleteCarResponse,
     GetCarResponse,
     RentCarResponse,
+    UpdateCarResponse,
 )
 
 
@@ -84,9 +85,28 @@ async def add_new_car(
 )
 async def delete_car(
     car_id: int, rentalService: IRentalService = Depends(get_rental_service)
-):
+) -> dict[str, int]:
     deleteCarId: int = rentalService.delete_car(car_id)
     return {"deleted_car_id": deleteCarId}
+
+
+# ===============================
+
+
+@router.put(
+    "/cars/all/{car_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=UpdateCarResponse,
+)
+async def update_car(
+    car_id: int,
+    updateCarDTO: UpdateCarDTO,
+    rentalService: IRentalService = Depends(get_rental_service),
+) -> dict[str, int]:
+    updateCarId: int = rentalService.update_car(
+        car_id=car_id, updateCarDTO=updateCarDTO
+    )
+    return {"updated_car_id": updateCarId}
 
 
 # ===============================
