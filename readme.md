@@ -25,9 +25,16 @@ This is a FastAPI-based API for managing a rental inventory system, focused on c
 
 ## Running the Application
 
-To start the server, run:
+To start the server, run one of the following commands:
+
+Using Uvicorn:
 ```
 uvicorn app.main:app --reload
+```
+
+Using FastAPI CLI (recommended for development):
+```
+fastapi dev app/main.py
 ```
 
 The API will be available at `http://127.0.0.1:8000`.
@@ -54,9 +61,52 @@ The project follows a layered architecture:
 - **Application**: Contains services
 - **Presentation**: Controllers, DTOs, and response models
 
+```
+readme.md
+requirements.txt
+app/
+    __init__.py
+    main.py
+    core/
+        __init__.py
+        bootstrap.py
+        container.py
+    modules/
+        rental/
+            __init__.py
+            application/
+                services/
+                    rental_service.py
+            domain/
+                enums/
+                    rent_status_enum.py
+                models/
+                    car.py
+                    store_item.py
+                repositories/
+                    i_rental_repository.py
+                services/
+                    i_rental_service.py
+            infrastructure/
+                repositories/
+                    rental_repository.py
+            presentation/
+                controllers/
+                    rental_controller.py
+                dto/
+                    create_car_dto.py
+                response/
+                    cars_qty_response.py
+                    check_available_car_response.py
+                    create_car_response.py
+                    delete_car_response.py
+                    get_car_response.py
+                    rent_car_response.py
+```
+
 ## Note on Current State
 
-The whole program is not finished. The main file (`app/main.py`) is essentially the same as the controllers, and everything has been imported into the presentation layer's controllers. The architecture needs proper separation between layers, with dependency injection and proper initialization handled in the main application file rather than within the controller.
+The project is now complete with proper layered architecture, dependency injection, and separation of concerns. The main application file handles initialization, while controllers focus on API endpoints, services contain business logic, and repositories manage data persistence.
 
 ## Technologies Used
 
