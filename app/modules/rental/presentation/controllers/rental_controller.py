@@ -69,9 +69,10 @@ async def get_one_car(
     response_model=CreateCarResponse,
 )
 async def add_new_car(
-    carDTO: CreateCarDTO, rentalService: IRentalService = Depends(get_rental_service)
+    createCarDTO: CreateCarDTO,
+    rentalService: IRentalService = Depends(get_rental_service),
 ) -> dict[str, int]:
-    NewCarId: int = rentalService.add_car(carDTO)
+    NewCarId: int = rentalService.add_car(createCarDTO=createCarDTO)
     return {"created_car_id": NewCarId}
 
 

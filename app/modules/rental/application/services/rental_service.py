@@ -38,14 +38,7 @@ class RentalService(IRentalService):
         self.rental_repository.generalId += 1
         newId: int = self.rental_repository.generalId
 
-        self.rental_repository.add_car(
-            car=Car(
-                id=newId,
-                brand=createCarDTO.brand,
-                model=createCarDTO.model,
-                year=createCarDTO.year,
-            )
-        )
+        self.rental_repository.add_car(createCarDTO=createCarDTO, newId=newId)
 
         return newId
 
@@ -82,10 +75,9 @@ class RentalService(IRentalService):
                 )
 
             elif item.status == RentStatusEnum.AVAILABLE:
-                item.car.brand = updateCarDTO.brand
-                item.car.model = updateCarDTO.model
-                item.car.year = updateCarDTO.year
-
+                self.rental_repository.update_car(
+                    car_id=car_id, updateCarDTO=updateCarDTO
+                )
                 return car_id
 
         raise HTTPException(

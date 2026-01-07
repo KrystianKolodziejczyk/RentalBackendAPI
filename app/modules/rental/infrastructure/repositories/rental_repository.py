@@ -26,15 +26,29 @@ class RentalRepository(IRentalRepository):
     def get_all_cars_qty(self) -> int:
         return int(len(self.ownedCars))
 
-    def add_car(self, car: Car) -> int:
-        newCar: StoreItem = StoreItem(car=car, status=RentStatusEnum.AVAILABLE)
+    def add_car(self, createCarDTO: Car, newId: int) -> int:
+        newCar: StoreItem = StoreItem(
+            car=Car(
+                id=newId,
+                brand=createCarDTO.brand,
+                model=createCarDTO.model,
+                year=createCarDTO.year,
+            ),
+            status=RentStatusEnum.AVAILABLE,
+        )
         self.ownedCars.append(newCar)
-        return newCar.car.id
 
     def delete_car(self, car_id: int) -> bool:
         for item in self.ownedCars:
             if item.car.id == car_id:
                 self.ownedCars.remove(item)
+
+    def update_car(self, car_id: int, updateCarDTO: Car):
+        for item in self.ownedCars:
+            if item.car.id == car_id:
+                item.car.brand = updateCarDTO.brand
+                item.car.model = updateCarDTO.model
+                item.car.year = updateCarDTO.year
 
     def get_available_cars(self) -> list[StoreItem]:
         return [
