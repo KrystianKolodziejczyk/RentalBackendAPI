@@ -51,9 +51,17 @@ class RentalService(IRentalService):
 
     # Deletes one store item instance
     def delete_car(self, car_id: int) -> int:
-        result: bool = self.rental_repository.delete_car(car_id=car_id)
-        if result:
-            return car_id
+        item: StoreItem = self.rental_repository.get_car_by_id(car_id=car_id)
+        if item:
+            if item.status == RentStatusEnum.RENTED:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="cant_delete_rented_car",
+                )
+
+            elif item.status == RentStatusEnum.AVAILABLE:
+                self.rental_repository.delete_car(car_id=car_id)
+                return car_id
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
