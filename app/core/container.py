@@ -6,5 +6,9 @@ from app.modules.rental.infrastructure.repositories.rental_repository import (
 from app.modules.rental.application.services.rental_service import RentalService
 
 
-rental_repository: IRentalRepository = RentalRepository()
-rental_service: IRentalService = RentalService(rental_repository=rental_repository)
+_rental_repository: IRentalRepository = RentalRepository()
+_rental_service: IRentalService = RentalService(rental_repository=_rental_repository)
+
+
+def get_rental_service() -> RentalService:
+    return _rental_service

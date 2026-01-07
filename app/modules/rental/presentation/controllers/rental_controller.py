@@ -1,49 +1,46 @@
-from fastapi import FastAPI, status
-from app.modules.rental.application.services.rental_service import RentalService
+from fastapi import APIRouter, status, Depends
+
+from app.core.container import get_rental_service
 from app.modules.rental.domain.models.car import Car
-from app.modules.rental.presentation.dto.create_car_dto import CreateCarDTO
-from app.modules.rental.presentation.response.check_available_car_response import (
-    CheckAvailableCarResponse,
-)
-from app.modules.rental.presentation.response.create_car_response import (
+from app.modules.rental.domain.services.i_rental_service import IRentalService
+from app.modules.rental.presentation.dto import CreateCarDTO
+from app.modules.rental.presentation.response import (
     CreateCarResponse,
+    CheckAvailableCarResponse,
+    CarsQtyResponse,
+    DeleteCarResponse,
+    GetCarResponse,
+    RentCarResponse,
 )
-from app.modules.rental.presentation.response.get_car_response import GetCarResponse
-from app.modules.rental.infrastructure.repositories.rental_repository import (
-    RentalRepository,
-)
-from app.modules.rental.presentation.response.cars_qty_response import CarsQtyResponse
-from app.modules.rental.presentation.response.delete_car_response import (
-    DeletCarResponse,
-)
-from app.modules.rental.presentation.response.rent_car_response import RentCarResponse
 
-rentalRepository = RentalRepository()
-rentalService = RentalService(rental_repository=rentalRepository)
 
-app = FastAPI()
+router = APIRouter()
 
 # ===== Store Controller ========
 
 # ===============================
 
 
-@app.get(
-    "/api/cars/all", status_code=status.HTTP_200_OK, response_model=list[GetCarResponse]
+@router.get(
+    "/cars/all", status_code=status.HTTP_200_OK, response_model=list[GetCarResponse]
 )
-async def get_all_cars() -> list[Car]:
+async def get_all_cars(
+    rentalService: IRentalService = Depends(get_rental_service),
+) -> list[Car]:
     return rentalService.get_all_cars()
 
 
 # ===============================
 
 
-@app.get(
-    "/api/cars/all/count",
+@router.get(
+    "/cars/all/count",
     status_code=status.HTTP_200_OK,
     response_model=CarsQtyResponse,
 )
-async def get_all_cars_qty() -> dict[str, int]:
+async def get_all_cars_qty(
+    rentalService: IRentalService = Depends(get_rental_service),
+) -> dict[str, int]:
     allCarsQty: int = rentalService.get_all_cars_qty()
     return {"total_number_of_cars": allCarsQty}
 
@@ -51,24 +48,28 @@ async def get_all_cars_qty() -> dict[str, int]:
 # ===============================
 
 
-@app.get(
-    "/api/cars/all/{car_id}",
+@router.get(
+    "/cars/all/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=GetCarResponse,
 )
-async def get_one_car(car_id: int) -> Car:
+async def get_one_car(
+    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+) -> Car:
     return rentalService.get_car_by_id(car_id)
 
 
 # ===============================
 
 
-@app.post(
-    "/api/cars/all",
+@router.post(
+    "/cars/all",
     status_code=status.HTTP_201_CREATED,
     response_model=CreateCarResponse,
 )
-async def add_new_car(carDTO: CreateCarDTO) -> dict[str, int]:
+async def add_new_car(
+    carDTO: CreateCarDTO, rentalService: IRentalService = Depends(get_rental_service)
+) -> dict[str, int]:
     NewCarId: int = rentalService.add_car(carDTO)
     return {"created_car_id": NewCarId}
 
@@ -76,12 +77,14 @@ async def add_new_car(carDTO: CreateCarDTO) -> dict[str, int]:
 # ===============================
 
 
-@app.delete(
-    "/api/cars/all/{car_id}",
+@router.delete(
+    "/cars/all/{car_id}",
     status_code=status.HTTP_200_OK,
-    response_model=DeletCarResponse,
+    response_model=DeleteCarResponse,
 )
-async def delete_car(car_id: int):
+async def delete_car(
+    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+):
     deleteCarId: int = rentalService.delete_car(car_id)
     return {"deleted_car_id": deleteCarId}
 
@@ -89,24 +92,28 @@ async def delete_car(car_id: int):
 # ===============================
 
 
-@app.get(
-    "/api/cars/rented",
+@router.get(
+    "/cars/rented",
     status_code=status.HTTP_200_OK,
     response_model=list[GetCarResponse],
 )
-async def get_available_cars() -> list[Car]:
+async def get_available_cars(
+    rentalService: IRentalService = Depends(get_rental_service),
+) -> list[Car]:
     return rentalService.get_available_cars()
 
 
 # ==============================
 
 
-@app.get(
-    "/api/cars/rented/check/{car_id}",
+@router.get(
+    "/cars/rented/check/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=CheckAvailableCarResponse,
 )
-async def check_available_car(car_id: int) -> dict[str, str]:
+async def check_available_car(
+    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+) -> dict[str, str]:
     carStatus: str = rentalService.check_car_availability(car_id=car_id)
     return {"car_status": carStatus}
 
@@ -114,12 +121,14 @@ async def check_available_car(car_id: int) -> dict[str, str]:
 # ==============================
 
 
-@app.patch(
-    "/api/cars/rented/rent/{car_id}",
+@router.patch(
+    "/cars/rented/rent/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=RentCarResponse,
 )
-async def rent_car(car_id: int) -> dict[str, str]:
+async def rent_car(
+    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+) -> dict[str, str]:
     carStatus: str = rentalService.rent_car(car_id=car_id)
     return {"car_status_changed_to": carStatus}
 
@@ -127,11 +136,13 @@ async def rent_car(car_id: int) -> dict[str, str]:
 # ==============================
 
 
-@app.patch(
-    "/api/cars/rented/return/{car_id}",
+@router.patch(
+    "/cars/rented/return/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=RentCarResponse,
 )
-async def return_car(car_id: int) -> dict[str, str]:
+async def return_car(
+    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+) -> dict[str, str]:
     carStatus: str = rentalService.return_car(car_id=car_id)
     return {"car_status_changed_to": carStatus}

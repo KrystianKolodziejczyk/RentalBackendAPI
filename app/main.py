@@ -1,3 +1,4 @@
-from app.modules.rental.presentation.controllers import rental_controller
+from fastapi import FastAPI
+from app.core.bootstrap import create_app
 
-rental_controller
+app: FastAPI = create_app()
