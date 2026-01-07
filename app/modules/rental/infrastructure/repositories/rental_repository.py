@@ -33,7 +33,7 @@ class RentalRepository(IRentalRepository):
 
     def delete_car(self, car_id: int) -> bool:
         for item in self.ownedCars:
-            if item.car.id == car_id:
+            if item.car.id == car_id and item.status != RentStatusEnum.RENTED:
                 self.ownedCars.remove(item)
                 return True
 
