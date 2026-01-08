@@ -17,7 +17,7 @@ from app.modules.rental.presentation.response import (
 
 router = APIRouter()
 
-# ===== Store Controller ========
+# ===== Rental Controller ========
 
 # ===============================
 
