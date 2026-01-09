@@ -10,5 +10,5 @@ class UpdateCustomerDTO(BaseModel):
     driver_license_id: str = Field(
         min_length=16,
         max_length=16,
-        description="Driver license must have 16 characters",
+        description="Drivers license must have 16 characters",
     )

@@ -54,7 +54,9 @@ class CustomerService(ICustomerService):
         )
 
     # Updates customer, returns ID
-    def update_customer(self, customer_id: int, updateCustomerDTO: UpdateCustomerDTO):
+    def update_customer(
+        self, customer_id: int, updateCustomerDTO: UpdateCustomerDTO
+    ) -> int:
         customer: Customer = self.customer_repository.get_one_customer(customer_id)
         if customer:
             if customer.phoneNumber in [
@@ -84,10 +86,8 @@ class CustomerService(ICustomerService):
         )
 
     # Blocks customer, returns ID
-    def block_customer(self, customer_id: int):
-        customer: Customer = self.customer_repository.get_one_customer(
-            customer_id=customer_id
-        )
+    def block_customer(self, customer_id: int) -> int:
+        customer: Customer = self.customer_repository.get_one_customer(customer_id)
         if customer:
             if customer.status == CustomerStatusEnum.BLOCKED:
                 raise HTTPException(
@@ -95,7 +95,7 @@ class CustomerService(ICustomerService):
                     detail="customer_already_blocked!",
                 )
 
-            elif customer.status == CustomerStatusEnum.ACTIVE:
+            elif customer.status == CustomerStatusEnum.UNLOCKED:
                 self.customer_repository.block_customer(customer_id=customer_id)
                 return customer_id
 
@@ -104,7 +104,7 @@ class CustomerService(ICustomerService):
         )
 
     # Unlocks customer, returns ID
-    def unlock_customer(self, customer_id: int):
+    def unlock_customer(self, customer_id: int) -> int:
         customer: Customer = self.customer_repository.get_one_customer(
             customer_id=customer_id
         )

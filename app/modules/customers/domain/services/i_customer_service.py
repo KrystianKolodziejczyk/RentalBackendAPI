@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from app.modules.customers.domain.enums.customer_status_enum import CustomerStatusEnum
 from app.modules.customers.domain.models.customer import Customer
+from app.modules.customers.presentation.dto import CreateCustomerDTO, UpdateCustomerDTO
 
 
 class ICustomerService(ABC):
@@ -11,13 +12,15 @@ class ICustomerService(ABC):
     def get_customer_by_id(self, customer_id: int) -> Customer: ...
 
     @abstractmethod
-    def add_customer(self) -> int: ...
+    def add_customer(self, createCustomerDTO: CreateCustomerDTO) -> int: ...
 
     @abstractmethod
     def delete_customer(self, customer_id: int) -> int: ...
 
     @abstractmethod
-    def update_customer(self, customer_id: int) -> int: ...
+    def update_customer(
+        self, customer_id: int, updateCustomerDTO: UpdateCustomerDTO
+    ) -> int: ...
 
     @abstractmethod
     def block_customer(self, customer_id: int) -> CustomerStatusEnum: ...

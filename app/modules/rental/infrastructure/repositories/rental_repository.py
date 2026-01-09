@@ -26,7 +26,7 @@ class RentalRepository(IRentalRepository):
     def get_all_cars_qty(self) -> int:
         return int(len(self.ownedCars))
 
-    def add_car(self, createCarDTO: Car, newId: int) -> int:
+    def add_car(self, createCarDTO: Car, newId: int) -> None:
         newCar: StoreItem = StoreItem(
             car=Car(
                 id=newId,
@@ -38,12 +38,12 @@ class RentalRepository(IRentalRepository):
         )
         self.ownedCars.append(newCar)
 
-    def delete_car(self, car_id: int) -> bool:
+    def delete_car(self, car_id: int) -> None:
         for item in self.ownedCars:
             if item.car.id == car_id:
                 self.ownedCars.remove(item)
 
-    def update_car(self, car_id: int, updateCarDTO: Car):
+    def update_car(self, car_id: int, updateCarDTO: Car) -> None:
         for item in self.ownedCars:
             if item.car.id == car_id:
                 item.car.brand = updateCarDTO.brand
