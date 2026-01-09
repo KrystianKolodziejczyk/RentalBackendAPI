@@ -51,9 +51,9 @@ class CustomerRepository(ICustomerRepository):
         for customer in self.customers:
             if customer.id == customer_id:
                 customer.name = updateCustomerDTO.name
-                customer.lastName = updateCustomerDTO.last_name
-                customer.phoneNumber = updateCustomerDTO.phone_number
-                customer.driverLicenseId = updateCustomerDTO.driver_license_id
+                customer.last_name = updateCustomerDTO.last_name
+                customer.phone_number = updateCustomerDTO.phone_number
+                customer.driver_license_id = updateCustomerDTO.driver_license_id
 
     # Blocks customer
     def block_customer(self, customer_id: int) -> None:

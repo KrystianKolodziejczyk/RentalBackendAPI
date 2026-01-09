@@ -4,10 +4,10 @@ from app.modules.customers.domain.enums.customer_status_enum import CustomerStat
 class Customer:
     id: int
     name: str
-    lastName: str
-    phoneNumber: int
+    last_name: str
+    phone_number: int
+    driver_license_id: str
     status: CustomerStatusEnum
-    driverLicenseId: str
 
     def __init__(
         self,
@@ -20,7 +20,7 @@ class Customer:
     ):
         self.id = id
         self.name = name
-        self.lastName = lastName
-        self.phoneNumber = phoneNumber
+        self.last_name = lastName
+        self.phone_number = phoneNumber
+        self.driver_license_id = driverLicenseId
         self.status = status
-        self.driverLicenseId = driverLicenseId

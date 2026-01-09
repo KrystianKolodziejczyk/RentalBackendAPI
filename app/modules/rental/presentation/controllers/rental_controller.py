@@ -17,7 +17,7 @@ from app.modules.rental.presentation.response import (
 
 router = APIRouter()
 
-# ===== Rental Controller ========
+# ===== Rental Controller =======
 
 # ===============================
 
@@ -27,7 +27,7 @@ router = APIRouter()
 )
 async def get_all_cars(
     rentalService: IRentalService = Depends(get_rental_service),
-) -> list[Car]:
+) -> list[GetCarResponse]:
     return rentalService.get_all_cars()
 
 
@@ -56,7 +56,7 @@ async def get_all_cars_qty(
 )
 async def get_one_car(
     car_id: int, rentalService: IRentalService = Depends(get_rental_service)
-) -> Car:
+) -> GetCarResponse:
     return rentalService.get_car_by_id(car_id)
 
 
