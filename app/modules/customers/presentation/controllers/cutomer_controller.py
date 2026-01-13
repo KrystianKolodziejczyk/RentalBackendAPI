@@ -72,7 +72,7 @@ async def add_customer(
 )
 async def delete_customer(
     customer_id: int, customerService: ICustomerService = Depends(get_customer_service)
-):
+) -> dict[str, int]:
     deleteId: int = customerService.delete_customer(customer_id=customer_id)
     return {"deleted_customer_id": deleteId}
 
