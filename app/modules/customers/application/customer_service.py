@@ -36,7 +36,7 @@ class CustomerService(ICustomerService):
                     detail="phone_number_already_in_database!",
                 )
 
-            if createCustomerDTO.driver_license_id == singleCustomer.phone_number:
+            if createCustomerDTO.driver_license_id == singleCustomer.driver_license_id:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="driver_licesnse_id_already_in_database",

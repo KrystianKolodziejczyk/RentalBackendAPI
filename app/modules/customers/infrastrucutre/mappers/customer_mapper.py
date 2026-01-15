@@ -1,4 +1,5 @@
 from app.modules.customers.domain.models.customer import Customer
+from app.modules.customers.domain.enums.customer_status_enum import CustomerStatusEnum
 
 
 class CustomerMapper:
@@ -10,7 +11,7 @@ class CustomerMapper:
             lastName=customerDict["last_name"],
             phoneNumber=customerDict["phone_number"],
             driverLicenseId=customerDict["driver_license_id"],
-            status=customerDict["status"],
+            status=CustomerStatusEnum(customerDict["status"]),
         )
 
     @staticmethod  # Probably to delete

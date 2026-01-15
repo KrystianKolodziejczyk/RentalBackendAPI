@@ -74,12 +74,19 @@ class CustomerRepositoryV2(ICustomerRepository):
     def update_customer(
         self, customer_id: int, updateCustomerDTO: UpdateCustomerDTO
     ) -> None:
-        for customer in self.customers:
-            if customer.id == customer_id:
-                customer.name = updateCustomerDTO.name
-                customer.last_name = updateCustomerDTO.last_name
-                customer.phone_number = updateCustomerDTO.phone_number
-                customer.driver_license_id = updateCustomerDTO.driver_license_id
+        customers: list[Customer] = self.get_all_customers()
+        for oneCustomer in customers:
+            if oneCustomer.id == customer_id:
+                oneCustomer.name = updateCustomerDTO.name
+                oneCustomer.last_name = updateCustomerDTO.last_name
+                oneCustomer.phone_number = updateCustomerDTO.phone_number
+                oneCustomer.driver_license_id = updateCustomerDTO.driver_license_id
+
+        customersDictList: list[dict] = [
+            CustomerMapper.customer_to_json(oneCustomer) for oneCustomer in customers
+        ]
+
+        FakeDatabse.save_json_list(path=self.path, pythonData=customersDictList)
 
     # Blocks customer
     def block_customer(self, customer_id: int) -> None:

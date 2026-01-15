@@ -23,4 +23,4 @@ class Customer:
         self.last_name = lastName
         self.phone_number = phoneNumber
         self.driver_license_id = driverLicenseId
-        self.status: CustomerStatusEnum = status
+        self.status = status

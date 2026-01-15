@@ -1,1 +1,1 @@
-[]
+[{"id": 2, "name": "Malik", "last_name": "Montana", "phone_number": 533583298, "driver_license_id": "PF3U38VHWW93K468", "status": "unlocked"}, {"id": 4, "name": "Kornel", "last_name": "Kredens", "phone_number": 382556289, "driver_license_id": "KFJE3935P206GJK3", "status": "unlocked"}, {"id": 5, "name": "Marek", "last_name": "Worasz", "phone_number": 953556289, "driver_license_id": "OCPE3935P206GJK3", "status": "unlocked"}, {"id": 1, "name": "Marek", "last_name": "Worasz", "phone_number": 353556289, "driver_license_id": "OCPE3935F206GJK3", "status": "unlocked"}]
