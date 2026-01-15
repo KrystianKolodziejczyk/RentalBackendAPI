@@ -17,6 +17,18 @@ class CustomerRepositoryV2(ICustomerRepository):
         self.path = Path("database/customers.json")
         self.generalId = 0
 
+    # Helper
+    def _parse_and_save(self, customers: list[Customer]) -> None:
+        customersDictList: list[dict] = [
+            CustomerMapper.customer_to_json(customer=oneCustomer)
+            for oneCustomer in customers
+        ]
+
+        FakeDatabse.save_json_list(
+            path=self.path,
+            pythonData=customersDictList,
+        )
+
     # Returns all customers
     def get_all_customers(self) -> list[Customer]:
         customers: list[dict] = FakeDatabse.get_json_list(path=self.path)
@@ -48,14 +60,7 @@ class CustomerRepositoryV2(ICustomerRepository):
             )
         )
 
-        customersDictList: list[dict] = [
-            CustomerMapper.customer_to_json(oneCustomer) for oneCustomer in customers
-        ]
-
-        FakeDatabse.save_json_list(
-            path=self.path,
-            pythonData=customersDictList,
-        )
+        self._parse_and_save(customers=customers)
 
     # Deletes customer
     def delete_customer(self, customer_id: int) -> None:
@@ -64,11 +69,7 @@ class CustomerRepositoryV2(ICustomerRepository):
             if oneCustomer.id == customer_id:
                 customers.remove(oneCustomer)
 
-        customersDictList: list[dict] = [
-            CustomerMapper.customer_to_json(oneCustomer) for oneCustomer in customers
-        ]
-
-        FakeDatabse.save_json_list(path=self.path, pythonData=customersDictList)
+        self._parse_and_save(customers=customers)
 
     # Updated customer
     def update_customer(
@@ -82,20 +83,22 @@ class CustomerRepositoryV2(ICustomerRepository):
                 oneCustomer.phone_number = updateCustomerDTO.phone_number
                 oneCustomer.driver_license_id = updateCustomerDTO.driver_license_id
 
-        customersDictList: list[dict] = [
-            CustomerMapper.customer_to_json(oneCustomer) for oneCustomer in customers
-        ]
-
-        FakeDatabse.save_json_list(path=self.path, pythonData=customersDictList)
+        self._parse_and_save(customers=customers)
 
     # Blocks customer
     def block_customer(self, customer_id: int) -> None:
-        for customer in self.customers:
-            if customer.id == customer_id:
-                customer.status = CustomerStatusEnum.BLOCKED
+        customers: list[Customer] = self.get_all_customers()
+        for oneCustomer in customers:
+            if oneCustomer.id == customer_id:
+                oneCustomer.status = CustomerStatusEnum.BLOCKED
+
+        self._parse_and_save(customers=customers)
 
     # Unlocks customer
     def unlock_customer(self, customer_id) -> None:
-        for customer in self.customers:
-            if customer.id == customer_id:
-                customer.status = CustomerStatusEnum.UNLOCKED
+        customers: list[Customer] = self.get_all_customers()
+        for oneCustomer in customers:
+            if oneCustomer.id == customer_id:
+                oneCustomer.status = CustomerStatusEnum.UNLOCKED
+
+        self._parse_and_save(customers=customers)
