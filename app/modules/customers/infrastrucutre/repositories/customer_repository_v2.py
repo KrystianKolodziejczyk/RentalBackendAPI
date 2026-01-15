@@ -4,6 +4,7 @@ from app.modules.customers.domain.repositories.i_customer_repository import (
     ICustomerRepository,
 )
 from app.modules.customers.presentation.dto import CreateCustomerDTO, UpdateCustomerDTO
+from app.shared.infrastructure.services.fake_database.fake_database import FakeDatabse
 
 
 class CustomerRepositoryV2(ICustomerRepository):

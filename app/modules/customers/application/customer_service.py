@@ -92,26 +92,24 @@ class CustomerService(ICustomerService):
     def block_customer(self, customer_id: int) -> int:
         customer: Customer = self.get_customer_by_id(customer_id)
 
-        if customer.status == CustomerStatusEnum.BLOCKED:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="customer_already_blocked!",
-            )
-
-        elif customer.status == CustomerStatusEnum.UNLOCKED:
+        if customer.status != CustomerStatusEnum.BLOCKED:
             self.customer_repository.block_customer(customer_id=customer_id)
             return customer_id
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="customer_already_blocked!",
+        )
 
     # Unlocks customer, returns ID
     def unlock_customer(self, customer_id: int) -> int:
         customer: Customer = self.get_customer_by_id(customer_id)
 
-        if customer.status == CustomerStatusEnum.UNLOCKED:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="customer_cant_be_unlocked_when_is_active!",
-            )
-
-        elif customer.status == CustomerStatusEnum.BLOCKED:
+        if customer.status != CustomerStatusEnum.UNLOCKED:
             self.customer_repository.unlock_customer(customer_id=customer_id)
             return customer_id
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="customer_cant_be_unlocked_when_is_active!",
+        )
