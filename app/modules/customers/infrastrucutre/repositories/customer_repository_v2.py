@@ -48,7 +48,7 @@ class CustomerRepositoryV2(ICustomerRepository):
             )
         )
 
-        customersDictList = [
+        customersDictList: list[dict] = [
             CustomerMapper.customer_to_json(oneCustomer) for oneCustomer in customers
         ]
 
@@ -59,9 +59,16 @@ class CustomerRepositoryV2(ICustomerRepository):
 
     # Deletes customer
     def delete_customer(self, customer_id: int) -> None:
-        for customer in self.customers:
-            if customer.id == customer_id:
-                self.customers.remove(customer)
+        customers: list[Customer] = self.get_all_customers()
+        for oneCustomer in customers:
+            if oneCustomer.id == customer_id:
+                customers.remove(oneCustomer)
+
+        customersDictList: list[dict] = [
+            CustomerMapper.customer_to_json(oneCustomer) for oneCustomer in customers
+        ]
+
+        FakeDatabse.save_json_list(path=self.path, pythonData=customersDictList)
 
     # Updated customer
     def update_customer(
