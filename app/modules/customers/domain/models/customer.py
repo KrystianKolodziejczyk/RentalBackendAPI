@@ -17,10 +17,10 @@ class Customer:
         phoneNumber: int,
         status: CustomerStatusEnum,
         driverLicenseId: str,
-    ):
+    ) -> None:
         self.id = id
         self.name = name
         self.last_name = lastName
         self.phone_number = phoneNumber
         self.driver_license_id = driverLicenseId
-        self.status = status
+        self.status: CustomerStatusEnum = status
