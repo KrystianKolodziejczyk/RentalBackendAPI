@@ -27,7 +27,7 @@ class RentalRepositoryV2(IRentalRepository):
         ]
 
     # Returns store's item instance
-    def get_car_by_id(self, car_id: int) -> StoreItem:
+    def get_storeItem_by_id(self, car_id: int) -> StoreItem:
         allStoreItems: list[StoreItem] = self.get_all_cars()
         for oneItem in allStoreItems:
             if oneItem.car.id == car_id:
@@ -52,12 +52,12 @@ class RentalRepositoryV2(IRentalRepository):
             )
         )
 
-        storeItemDictList: list[dict] = [
+        storeItemListDicts: list[dict] = [
             StoreItemMapper.storeItem_to_json(storeItem=oneStoreItem)
             for oneStoreItem in allStoreItems
         ]
 
-        FakeDatabse.save_json_list(path=self.path, pythonData=storeItemDictList)
+        FakeDatabse.save_json_list(path=self.path, pythonData=storeItemListDicts)
 
     def delete_car(self, car_id: int) -> None:
         allStoreItems: list[StoreItem] = self.get_all_cars()
@@ -65,33 +65,32 @@ class RentalRepositoryV2(IRentalRepository):
             if oneStoreItem.car.id == car_id:
                 allStoreItems.remove(oneStoreItem)
 
-        storeItemDictList: list[dict] = [
+        storeItemListDicts: list[dict] = [
             StoreItemMapper.storeItem_to_json(storeItem=oneStoreItem)
             for oneStoreItem in allStoreItems
         ]
 
-        FakeDatabse.save_json_list(path=self.path, pythonData=storeItemDictList)
+        FakeDatabse.save_json_list(path=self.path, pythonData=storeItemListDicts)
 
     def update_car(self, car_id: int, updateCarDTO: Car) -> None:
-        for item in self.ownedCars:
-            if item.car.id == car_id:
-                item.car.brand = updateCarDTO.brand
-                item.car.model = updateCarDTO.model
-                item.car.year = updateCarDTO.year
+        allStoreItems: list[StoreItem] = self.get_all_cars()
+        for oneStoreItem in allStoreItems:
+            if oneStoreItem.car.id == car_id:
+                oneStoreItem.car.brand = updateCarDTO.brand
+                oneStoreItem.car.model = updateCarDTO.model
+                oneStoreItem.car.year = updateCarDTO.year
 
-    def get_available_cars(self) -> list[StoreItem]:
-        return [
-            item.car
-            for item in self.ownedCars
-            if item.status == RentStatusEnum.AVAILABLE
+        storeItemListDicts: list[dict] = [
+            StoreItemMapper.storeItem_to_json(storeItem=oneStoreItem)
+            for oneStoreItem in allStoreItems
         ]
 
-    def find_available_car(self, car_id) -> RentStatusEnum | bool:
-        for item in self.ownedCars:
-            if car_id == item.car.id and item.status == RentStatusEnum.AVAILABLE:
-                return RentStatusEnum.AVAILABLE
+        FakeDatabse.save_json_list(path=self.path, pythonData=storeItemListDicts)
 
-            elif car_id == item.car.id and item.status == RentStatusEnum.RENTED:
-                return RentStatusEnum.RENTED
-
-        return False
+    def get_available_cars(self, status: RentStatusEnum) -> list[StoreItem]:
+        allStoreItems: list[StoreItem] = self.get_all_cars()
+        return [
+            oneStoreItem
+            for oneStoreItem in allStoreItems
+            if oneStoreItem.status == status
+        ]

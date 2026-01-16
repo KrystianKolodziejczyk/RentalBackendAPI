@@ -20,10 +20,10 @@ class RentalService(IRentalService):
         return [car.car for car in allCars]
 
     # Returns one store item instance by id
-    def get_car_by_id(self, car_id: int) -> Car:
-        item: StoreItem = self.rental_repository.get_car_by_id(car_id)
-        if item:
-            return item
+    def get_storeItem_by_id(self, car_id: int) -> StoreItem:
+        oneStoreItem: StoreItem = self.rental_repository.get_storeItem_by_id(car_id)
+        if oneStoreItem:
+            return oneStoreItem
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
@@ -44,8 +44,8 @@ class RentalService(IRentalService):
 
     # Deletes one store item instance
     def delete_car(self, car_id: int) -> int:
-        item: StoreItem = self.get_car_by_id(car_id=car_id)
-        if not item.status == RentStatusEnum.RENTED:
+        oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
+        if not oneStoreItem.status == RentStatusEnum.RENTED:
             self.rental_repository.delete_car(car_id=car_id)
             return car_id
 
@@ -55,80 +55,53 @@ class RentalService(IRentalService):
         )
 
     # Updates selected car info
-    def update_car(
-        self,
-        car_id: int,
-        updateCarDTO: UpdateCarDTO,
-    ) -> int:
-        item: StoreItem = self.rental_repository.get_car_by_id(car_id=car_id)
-        if item:
-            if item.status == RentStatusEnum.RENTED:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="cant_change_rented_car!",
-                )
-
-            elif item.status == RentStatusEnum.AVAILABLE:
-                self.rental_repository.update_car(
-                    car_id=car_id, updateCarDTO=updateCarDTO
-                )
-                return car_id
+    def update_car(self, car_id: int, updateCarDTO: UpdateCarDTO) -> int:
+        oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
+        if not oneStoreItem.status == RentStatusEnum.RENTED:
+            self.rental_repository.update_car(car_id=car_id, updateCarDTO=updateCarDTO)
+            return car_id
 
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="cant_change_rented_car!",
         )
 
     # Returns only available store items
-    def get_available_cars(self) -> list[StoreItem]:
-        availableCars = self.rental_repository.get_available_cars()
-        if availableCars:
-            return availableCars
+    def get_available_cars(self) -> list[Car]:
+        availableItems: list[StoreItem] = self.rental_repository.get_available_cars(
+            RentStatusEnum.AVAILABLE
+        )
+        if availableItems:
+            return [oneItem.car for oneItem in availableItems]
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="no_available_cars"
         )
 
     # Checks and returns availabilty of one car
-    def check_car_availability(self, car_id) -> RentStatusEnum:
-        availableCar: str = self.rental_repository.find_available_car(car_id=car_id)
-        if availableCar:
-            return availableCar
-
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
-        )
+    def check_car_availability(self, car_id: int) -> RentStatusEnum:
+        oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
+        return oneStoreItem.status
 
     # Changes item's status to Rented
     def rent_car(self, car_id: int) -> RentStatusEnum:
-        item = self.rental_repository.get_car_by_id(car_id=car_id)
-        if item:
-            if item.status == RentStatusEnum.RENTED:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="car_already_rented",
-                )
-
-            elif item.status == RentStatusEnum.AVAILABLE:
-                item.status = RentStatusEnum.RENTED
-                return RentStatusEnum.RENTED
+        oneItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
+        if not oneItem.status == RentStatusEnum.RENTED:
+            oneItem.status = RentStatusEnum.RENTED
+            return oneItem.status
 
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="car_already_rented",
         )
 
-    def return_car(self, car_id) -> RentStatusEnum:
-        item = self.rental_repository.get_car_by_id(car_id=car_id)
-        if item:
-            if item.status == RentStatusEnum.AVAILABLE:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="this_car_is_not_rented",
-                )
-
-            elif item.status == RentStatusEnum.RENTED:
-                item.status = RentStatusEnum.AVAILABLE
-                return RentStatusEnum.AVAILABLE
+    def return_car(self, car_id: int) -> RentStatusEnum:
+        oneItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
+        if not oneItem.status == RentStatusEnum.AVAILABLE:
+            oneItem.status = RentStatusEnum.AVAILABLE
+            return oneItem.status
 
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="car_already_rented",
         )
