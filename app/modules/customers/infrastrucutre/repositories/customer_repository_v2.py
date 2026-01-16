@@ -13,8 +13,8 @@ class CustomerRepositoryV2(ICustomerRepository):
     path: Path
     generalId: int
 
-    def __init__(self):
-        self.path = Path("database/customers.json")
+    def __init__(self, path: Path):
+        self.path = path
         self.generalId = 0
 
     # Helper
