@@ -8,8 +8,8 @@ from app.modules.customers.infrastrucutre.repositories.customer_repository_v2 im
 )
 from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
 from app.modules.rental.domain.services.i_rental_service import IRentalService
-from app.modules.rental.infrastructure.repositories.rental_repository import (
-    RentalRepository,
+from app.modules.rental.infrastructure.repositories.rental_repository_v2 import (
+    RentalRepositoryV2,
 )
 from app.modules.rental.application.services.rental_service import RentalService
 from app.shared.infrastructure.services.storage_ensure.storage_ensure import (
@@ -17,7 +17,7 @@ from app.shared.infrastructure.services.storage_ensure.storage_ensure import (
 )
 
 
-_rental_repository: IRentalRepository = RentalRepository()
+_rental_repository: IRentalRepository = RentalRepositoryV2()
 _rental_service: IRentalService = RentalService(rental_repository=_rental_repository)
 _customer_repository: ICustomerRepository = CustomerRepositoryV2(
     path=StorageEnsure.get_path(fileName="customers.json")
