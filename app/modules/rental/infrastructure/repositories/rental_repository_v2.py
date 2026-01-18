@@ -12,11 +12,9 @@ class RentalRepositoryV2(IRentalRepositoryV2):
     general_id: int
     path: Path
 
-    def __init__(self) -> None:
+    def __init__(self, path: Path) -> None:
         self.general_id = 0
-        self.path = Path.cwd().resolve()
-        self.dir = self.path / "database"
-        self.file = self.dir / "store_item.json"
+        self.path = path
 
     # Returns list of all instances
     def get_all(self) -> list[StoreItem]:

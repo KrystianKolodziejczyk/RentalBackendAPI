@@ -5,15 +5,13 @@ from app.shared.infrastructure.services.fake_database.fake_database import FakeD
 
 class StorageEnsure(IStorageEnsure):
     @staticmethod
-    def get_path(fileName: str) -> Path:
-        cwdPath = Path.cwd().resolve()
-        databaseDir = cwdPath / "database"
-        jsonFilePath = databaseDir / fileName
+    def get_path(file_name: str) -> Path:
+        root = Path.cwd().resolve()
+        database_dir = root / "database"
+        json_file_path = database_dir / file_name
 
-        if not jsonFilePath.exists():
-            databaseDir.mkdir(parents=True, exist_ok=True)
-            jsonFilePath.touch(exist_ok=True)
+        if not json_file_path.exists():
+            database_dir.mkdir(parents=True, exist_ok=True)
+            json_file_path.write_text(data="[]")
 
-            FakeDatabse.save_json_list(path=jsonFilePath, pythonData=[])
-
-        return jsonFilePath
+        return json_file_path

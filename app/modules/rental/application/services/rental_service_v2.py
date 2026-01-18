@@ -27,7 +27,7 @@ class RentalServiceV2(IRentalService):
         )
 
     # Helper, returns tuple
-    def _get_all_and_find(self, car_id: int) -> tuple:
+    def _get_all_and_find(self, car_id: int) -> tuple[list[StoreItem], StoreItem]:
         all_items: list[StoreItem] = self.rental_repository.get_all()
         one_item: StoreItem = self._find_by_id(items=all_items, car_id=car_id)
         return all_items, one_item
