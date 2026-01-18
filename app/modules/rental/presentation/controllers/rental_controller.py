@@ -26,9 +26,9 @@ router = APIRouter()
     "/cars/all", status_code=status.HTTP_200_OK, response_model=list[GetCarResponse]
 )
 async def get_all_cars(
-    rentalService: IRentalService = Depends(get_rental_service),
+    rental_service: IRentalService = Depends(get_rental_service),
 ) -> list[GetCarResponse]:
-    return rentalService.get_all_cars()
+    return rental_service.get_all_cars()
 
 
 # ===============================
@@ -40,10 +40,10 @@ async def get_all_cars(
     response_model=CarsQtyResponse,
 )
 async def get_all_cars_qty(
-    rentalService: IRentalService = Depends(get_rental_service),
+    rental_service: IRentalService = Depends(get_rental_service),
 ) -> dict[str, int]:
-    allCarsQty: int = rentalService.get_all_cars_qty()
-    return {"total_number_of_cars": allCarsQty}
+    all_cars_qty: int = rental_service.get_all_cars_qty()
+    return {"total_number_of_cars": all_cars_qty}
 
 
 # ===============================
@@ -55,9 +55,9 @@ async def get_all_cars_qty(
     response_model=GetCarResponse,
 )
 async def get_one_car(
-    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+    car_id: int, rental_service: IRentalService = Depends(get_rental_service)
 ) -> GetCarResponse:
-    return rentalService.get_storeItem_by_id(car_id)
+    return rental_service.get_store_item_by_id(car_id)
 
 
 # ===============================
@@ -69,11 +69,11 @@ async def get_one_car(
     response_model=CreateCarResponse,
 )
 async def add_new_car(
-    createCarDTO: CreateCarDTO,
-    rentalService: IRentalService = Depends(get_rental_service),
+    create_car_dto: CreateCarDTO,
+    rental_service: IRentalService = Depends(get_rental_service),
 ) -> dict[str, int]:
-    NewCarId: int = rentalService.add_car(createCarDTO=createCarDTO)
-    return {"created_car_id": NewCarId}
+    new_car_id: int = rental_service.add_car(create_car_dto=create_car_dto)
+    return {"created_car_id": new_car_id}
 
 
 # ===============================
@@ -85,10 +85,10 @@ async def add_new_car(
     response_model=DeleteCarResponse,
 )
 async def delete_car(
-    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+    car_id: int, rental_service: IRentalService = Depends(get_rental_service)
 ) -> dict[str, int]:
-    deleteCarId: int = rentalService.delete_car(car_id)
-    return {"deleted_car_id": deleteCarId}
+    delete_car_id: int = rental_service.delete_car(car_id)
+    return {"deleted_car_id": delete_car_id}
 
 
 # ===============================
@@ -101,69 +101,69 @@ async def delete_car(
 )
 async def update_car(
     car_id: int,
-    updateCarDTO: UpdateCarDTO,
-    rentalService: IRentalService = Depends(get_rental_service),
+    update_car_dto: UpdateCarDTO,
+    rental_service: IRentalService = Depends(get_rental_service),
 ) -> dict[str, int]:
-    updateCarId: int = rentalService.update_car(
-        car_id=car_id, updateCarDTO=updateCarDTO
+    update_car_id: int = rental_service.update_car(
+        car_id=car_id, update_car_dto=update_car_dto
     )
-    return {"updated_car_id": updateCarId}
+    return {"updated_car_id": update_car_id}
 
 
 # ===============================
 
 
 @router.get(
-    "/cars/rented",
+    "/cars/rental/available",
     status_code=status.HTTP_200_OK,
     response_model=list[GetCarResponse],
 )
 async def get_available_cars(
-    rentalService: IRentalService = Depends(get_rental_service),
+    rental_service: IRentalService = Depends(get_rental_service),
 ) -> list[Car]:
-    return rentalService.get_available_cars()
+    return rental_service.get_available_cars()
 
 
 # ==============================
 
 
 @router.get(
-    "/cars/rented/check/{car_id}",
+    "/cars/rental/available/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=CheckAvailableCarResponse,
 )
 async def check_available_car(
-    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+    car_id: int, rental_service: IRentalService = Depends(get_rental_service)
 ) -> dict[str, str]:
-    carStatus: str = rentalService.check_car_availability(car_id=car_id)
-    return {"car_status": carStatus}
+    car_status: str = rental_service.check_car_status(car_id=car_id)
+    return {"car_status": car_status}
 
 
 # ==============================
 
 
 @router.patch(
-    "/cars/rented/rent/{car_id}",
+    "/cars/rental/rent/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=RentCarResponse,
 )
 async def rent_car(
-    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+    car_id: int, rental_service: IRentalService = Depends(get_rental_service)
 ) -> dict[str, str]:
-    carStatus: str = rentalService.rent_car(car_id=car_id)
-    return {"car_status_changed_to": carStatus}
+    car_status: str = rental_service.rent_car(car_id=car_id)
+    return {"car_status_changed_to": car_status}
 
 
 # ==============================
 
 
 @router.patch(
-    "/cars/rented/return/{car_id}",
+    "/cars/rental/return/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=RentCarResponse,
 )
 async def return_car(
-    car_id: int, rentalService: IRentalService = Depends(get_rental_service)
+    car_id: int, rental_service: IRentalService = Depends(get_rental_service)
 ) -> dict[str, str]:
-    carStatus: str = rentalService.return_car(car_id=car_id)
-    return {"car_status_changed_to": carStatus}
+    car_status: str = rental_service.return_car(car_id=car_id)
+    return {"car_status_changed_to": car_status}

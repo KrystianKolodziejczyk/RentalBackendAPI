@@ -5,25 +5,25 @@ from app.modules.rental.domain.models.store_item import StoreItem
 
 class StoreItemMapper:
     @staticmethod
-    def json_to_storeItem(storeItemDict: dict) -> StoreItem:
+    def json_to_store_item(store_item_dict: dict) -> StoreItem:
         return StoreItem(
             car=Car(
-                id=storeItemDict["car"]["id"],
-                brand=storeItemDict["car"]["brand"],
-                model=storeItemDict["car"]["model"],
-                year=storeItemDict["car"]["year"],
+                id=store_item_dict["car"]["id"],
+                brand=store_item_dict["car"]["brand"],
+                model=store_item_dict["car"]["model"],
+                year=store_item_dict["car"]["year"],
             ),
-            status=RentStatusEnum(storeItemDict["status"]),
+            status=RentStatusEnum(store_item_dict["status"]),
         )
 
     @staticmethod
-    def storeItem_to_json(storeItem: StoreItem) -> dict[str, dict | str]:
+    def store_item_to_json(store_item: StoreItem) -> dict[str, dict | str]:
         return {
             "car": {
-                "id": storeItem.car.id,
-                "brand": storeItem.car.brand,
-                "model": storeItem.car.model,
-                "year": storeItem.car.year,
+                "id": store_item.car.id,
+                "brand": store_item.car.brand,
+                "model": store_item.car.model,
+                "year": store_item.car.year,
             },
-            "status": storeItem.status.value,
+            "status": store_item.status.value,
         }

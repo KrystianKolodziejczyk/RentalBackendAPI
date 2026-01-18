@@ -6,19 +6,21 @@ from app.modules.customers.domain.services.i_customer_service import ICustomerSe
 from app.modules.customers.infrastrucutre.repositories.customer_repository_v2 import (
     CustomerRepositoryV2,
 )
-from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
+from app.modules.rental.domain.repositories.i_rental_repository_v2 import (
+    IRentalRepositoryV2,
+)
 from app.modules.rental.domain.services.i_rental_service import IRentalService
 from app.modules.rental.infrastructure.repositories.rental_repository_v2 import (
     RentalRepositoryV2,
 )
-from app.modules.rental.application.services.rental_service import RentalService
+from app.modules.rental.application.services.rental_service_v2 import RentalServiceV2
 from app.shared.infrastructure.services.storage_ensure.storage_ensure import (
     StorageEnsure,
 )
 
 
-_rental_repository: IRentalRepository = RentalRepositoryV2()
-_rental_service: IRentalService = RentalService(rental_repository=_rental_repository)
+_rental_repository: IRentalRepositoryV2 = RentalRepositoryV2()
+_rental_service: IRentalService = RentalServiceV2(rental_repository=_rental_repository)
 _customer_repository: ICustomerRepository = CustomerRepositoryV2(
     path=StorageEnsure.get_path(fileName="customers.json")
 )
@@ -27,7 +29,7 @@ _customer_service: ICustomerService = CustomerService(
 )
 
 
-def get_rental_service() -> RentalService:
+def get_rental_service() -> RentalServiceV2:
     return _rental_service
 
 
