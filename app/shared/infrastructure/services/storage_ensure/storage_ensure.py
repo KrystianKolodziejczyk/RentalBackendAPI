@@ -1,6 +1,5 @@
 from pathlib import Path
 from app.shared.domain.services.storage_ensure.i_storage_ensure import IStorageEnsure
-from app.shared.infrastructure.services.fake_database.fake_database import FakeDatabse
 
 
 class StorageEnsure(IStorageEnsure):

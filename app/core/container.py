@@ -29,7 +29,7 @@ _customer_repository: ICustomerRepository = CustomerRepositoryV2(
     path=StorageEnsure.get_path("customers.json")
 )
 _customer_service: ICustomerService = CustomerServiceV2(
-    customerRepository=_customer_repository
+    customer_repository=_customer_repository
 )
 
 
