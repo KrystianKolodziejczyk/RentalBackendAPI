@@ -40,6 +40,12 @@ class RentalServiceV2(IRentalService):
                 detail=f"cant_{action}_rented_car!",
             )
 
+    def _get_last_id(self, item_list: list[StoreItem]) -> int:
+        if not item_list:
+            return 1
+
+        return max(item.car.id for item in item_list) + 1
+
     # Returns all store items instances
     def get_all_cars(self) -> list[Car]:
         all_cars = self.rental_repository.get_all()
@@ -56,10 +62,9 @@ class RentalServiceV2(IRentalService):
 
     # Adds new store item instance
     def add_car(self, create_car_dto: CreateCarDTO) -> int:
-        self.rental_repository.general_id += 1
-        new_id: int = self.rental_repository.general_id
-
         all_items: list[StoreItem] = self.rental_repository.get_all()
+        new_id: int = self._get_last_id(item_list=all_items)
+
         all_items.append(
             StoreItem(
                 car=Car(

@@ -13,14 +13,14 @@ class Customer:
         self,
         id: int,
         name: str,
-        lastName: str,
-        phoneNumber: int,
+        last_name: str,
+        phone_number: int,
         status: CustomerStatusEnum,
-        driverLicenseId: str,
+        driver_license_id: str,
     ) -> None:
         self.id = id
         self.name = name
-        self.last_name = lastName
-        self.phone_number = phoneNumber
-        self.driver_license_id = driverLicenseId
+        self.last_name = last_name
+        self.phone_number = phone_number
+        self.driver_license_id = driver_license_id
         self.status = status

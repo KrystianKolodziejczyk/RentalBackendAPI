@@ -12,14 +12,14 @@ class ICustomerService(ABC):
     def get_customer_by_id(self, customer_id: int) -> Customer: ...
 
     @abstractmethod
-    def add_customer(self, createCustomerDTO: CreateCustomerDTO) -> int: ...
+    def add_customer(self, create_customer_dto: CreateCustomerDTO) -> int: ...
 
     @abstractmethod
     def delete_customer(self, customer_id: int) -> int: ...
 
     @abstractmethod
     def update_customer(
-        self, customer_id: int, updateCustomerDTO: UpdateCustomerDTO
+        self, customer_id: int, update_customer_dto: UpdateCustomerDTO
     ) -> int: ...
 
     @abstractmethod

@@ -26,9 +26,9 @@ router = APIRouter()
     response_model=list[GetCustomerResponse],
 )
 async def get_all_customers(
-    customerService: ICustomerService = Depends(get_customer_service),
+    customer_service: ICustomerService = Depends(get_customer_service),
 ) -> list[GetCustomerResponse]:
-    return customerService.get_all_customers()
+    return customer_service.get_all_customers()
 
 
 # ===============================
@@ -41,9 +41,9 @@ async def get_all_customers(
 )
 async def get_customer_by_id(
     customer_id: int,
-    customerService: ICustomerService = Depends(get_customer_service),
+    customer_service: ICustomerService = Depends(get_customer_service),
 ) -> GetCustomerResponse:
-    return customerService.get_customer_by_id(customer_id)
+    return customer_service.get_customer_by_id(customer_id)
 
 
 # ===============================
@@ -55,11 +55,11 @@ async def get_customer_by_id(
     response_model=CreateCustomerResponse,
 )
 async def add_customer(
-    createCustomerDTO: CreateCustomerDTO,
-    customerService: ICustomerService = Depends(get_customer_service),
+    create_customer_dto: CreateCustomerDTO,
+    customer_service: ICustomerService = Depends(get_customer_service),
 ) -> dict[str, int]:
-    newId: int = customerService.add_customer(createCustomerDTO=createCustomerDTO)
-    return {"created_customer_id": newId}
+    new_id: int = customer_service.add_customer(create_customer_dto=create_customer_dto)
+    return {"created_customer_id": new_id}
 
 
 # ===============================
@@ -71,10 +71,10 @@ async def add_customer(
     response_model=DeleteCustomerResponse,
 )
 async def delete_customer(
-    customer_id: int, customerService: ICustomerService = Depends(get_customer_service)
+    customer_id: int, customer_service: ICustomerService = Depends(get_customer_service)
 ) -> dict[str, int]:
-    deleteId: int = customerService.delete_customer(customer_id=customer_id)
-    return {"deleted_customer_id": deleteId}
+    delete_id: int = customer_service.delete_customer(customer_id=customer_id)
+    return {"deleted_customer_id": delete_id}
 
 
 # ===============================
@@ -87,13 +87,13 @@ async def delete_customer(
 )
 async def update_customer(
     customer_id: int,
-    updateCustomerDTO: UpdateCustomerDTO,
-    customerService: ICustomerService = Depends(get_customer_service),
+    update_customer_dto: UpdateCustomerDTO,
+    customer_service: ICustomerService = Depends(get_customer_service),
 ) -> dict[str, int]:
-    updatedId: int = customerService.update_customer(
-        customer_id=customer_id, updateCustomerDTO=updateCustomerDTO
+    updated_id: int = customer_service.update_customer(
+        customer_id=customer_id, update_customer_dto=update_customer_dto
     )
-    return {"updated_customer_id": updatedId}
+    return {"updated_customer_id": updated_id}
 
 
 # ===============================
@@ -105,10 +105,10 @@ async def update_customer(
     response_model=BlockCustomerResponse,
 )
 async def block_customer(
-    customer_id: int, customerService: ICustomerService = Depends(get_customer_service)
+    customer_id: int, customer_service: ICustomerService = Depends(get_customer_service)
 ) -> dict[str, int]:
-    blockedId: int = customerService.block_customer(customer_id=customer_id)
-    return {"blocked_customer_with_id": blockedId}
+    blocked_id: int = customer_service.block_customer(customer_id=customer_id)
+    return {"blocked_customer_with_id": blocked_id}
 
 
 # ===============================
@@ -120,7 +120,7 @@ async def block_customer(
     response_model=UnlockCustomerResponse,
 )
 async def unlock_customer(
-    customer_id: int, customerService: ICustomerService = Depends(get_customer_service)
+    customer_id: int, customer_service: ICustomerService = Depends(get_customer_service)
 ) -> dict[str, int]:
-    unlockId: int = customerService.unlock_customer(customer_id=customer_id)
-    return {"unlocked_customer_with_id": unlockId}
+    unlock_id: int = customer_service.unlock_customer(customer_id=customer_id)
+    return {"unlocked_customer_with_id": unlock_id}

@@ -4,14 +4,14 @@ from app.modules.customers.domain.enums.customer_status_enum import CustomerStat
 
 class CustomerMapper:
     @staticmethod
-    def json_to_customer(customerDict: dict) -> Customer:
+    def json_to_customer(customer_dict: dict) -> Customer:
         return Customer(
-            id=customerDict["id"],
-            name=customerDict["name"],
-            lastName=customerDict["last_name"],
-            phoneNumber=customerDict["phone_number"],
-            driverLicenseId=customerDict["driver_license_id"],
-            status=CustomerStatusEnum(customerDict["status"]),
+            id=customer_dict["id"],
+            name=customer_dict["name"],
+            last_name=customer_dict["last_name"],
+            phone_number=customer_dict["phone_number"],
+            driver_license_id=customer_dict["driver_license_id"],
+            status=CustomerStatusEnum(customer_dict["status"]),
         )
 
     @staticmethod  # Probably to delete

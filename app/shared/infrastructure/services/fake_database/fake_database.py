@@ -10,6 +10,6 @@ class FakeDatabse(IFakeDatabase):
             return json.load(f)
 
     @staticmethod
-    def save_json_list(path: Path, pythonData: list[dict]) -> None:
+    def save_json_list(path: Path, python_data: list[dict]) -> None:
         with open(path, mode="w", encoding="utf-8", newline=None) as f:
-            json.dump(pythonData, f)
+            json.dump(python_data, f)

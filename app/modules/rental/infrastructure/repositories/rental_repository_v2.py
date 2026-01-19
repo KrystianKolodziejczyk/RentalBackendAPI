@@ -9,11 +9,9 @@ from app.modules.rental.infrastructure.mappers.store_item_mapper import StoreIte
 
 # Storehouse Class
 class RentalRepositoryV2(IRentalRepositoryV2):
-    general_id: int
     path: Path
 
     def __init__(self, path: Path) -> None:
-        self.general_id = 0
         self.path = path
 
     # Returns list of all instances
@@ -30,4 +28,4 @@ class RentalRepositoryV2(IRentalRepositoryV2):
             for one_store_item in store_item_list
         ]
 
-        FakeDatabse.save_json_list(path=self.path, pythonData=store_items_list_dict)
+        FakeDatabse.save_json_list(path=self.path, python_data=store_items_list_dict)

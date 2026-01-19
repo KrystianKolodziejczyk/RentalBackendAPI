@@ -9,16 +9,14 @@ from pathlib import Path
 
 class CustomerRepositoryV2(ICustomerRepository):
     path: Path
-    generalId: int
 
     def __init__(self, path: Path):
         self.path = path
-        self.generalId = 0
 
     def get_all(self) -> list[Customer]:
         customers_list_dict: list[dict] = FakeDatabse.get_json_list(path=self.path)
         return [
-            CustomerMapper.json_to_customer(customerDict=one_customer)
+            CustomerMapper.json_to_customer(customer_dict=one_customer)
             for one_customer in customers_list_dict
         ]
 
@@ -28,4 +26,4 @@ class CustomerRepositoryV2(ICustomerRepository):
             for one_customer in customers_list
         ]
 
-        FakeDatabse.save_json_list(path=self.path, pythonData=customers_list_dict)
+        FakeDatabse.save_json_list(path=self.path, python_data=customers_list_dict)

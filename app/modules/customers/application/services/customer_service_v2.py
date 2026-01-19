@@ -24,43 +24,54 @@ class CustomerServiceV2(ICustomerService):
             status_code=status.HTTP_404_NOT_FOUND, detail="customer_doesnt_exists"
         )
 
+    # Helper
+    def _get_last_id(self, customers_list: list[Customer]) -> int:
+        if not customers_list:
+            return 1
+
+        return max(one_customer.id for one_customer in customers_list) + 1
+
+    # Helper
+    def _get_all_and_find(self, customer_id: int) -> tuple[list[Customer], Customer]:
+        all_customers: list[Customer] = self.customer_repository.get_all()
+        one_customer: Customer = self._find_by_id(
+            customers_list=all_customers, customer_id=customer_id
+        )
+        return all_customers, one_customer
+
     # Returns all customers list
     def get_all_customers(self) -> list[Customer]:
         return self.customer_repository.get_all()
 
     # Returns customer
     def get_customer_by_id(self, customer_id: int) -> Customer | None:
-        all_customer: list[Customer] = self.customer_repository.get_all()
-        one_customer: Customer = self._find_by_id(
-            customers_list=all_customer, customer_id=customer_id
-        )
+        _, one_customer = self._get_all_and_find(customer_id=customer_id)
         return one_customer
 
     # Adds customer, creates new ID, returns ID
-    def add_customer(self, createCustomerDTO: CreateCustomerDTO) -> int:
+    def add_customer(self, create_customer_dto: CreateCustomerDTO) -> int:
         all_customers: list[Customer] = self.customer_repository.get_all()
         for one_customer in all_customers:
-            if one_customer.phone_number == createCustomerDTO.phone_number:
+            if one_customer.phone_number == create_customer_dto.phone_number:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="Customer_phone_number_already_in_database",
                 )
-            if one_customer.driver_license_id == createCustomerDTO.driver_license_id:
+            if one_customer.driver_license_id == create_customer_dto.driver_license_id:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="Customer_driver_license_already_in_database",
                 )
 
-        self.customer_repository.generalId += 1
-        new_id: int = self.customer_repository.generalId
+        new_id: int = self._get_last_id(customers_list=all_customers)
 
         all_customers.append(
             Customer(
                 id=new_id,
-                name=createCustomerDTO.name,
-                lastName=createCustomerDTO.last_name,
-                phoneNumber=createCustomerDTO.phone_number,
-                driverLicenseId=createCustomerDTO.driver_license_id,
+                name=create_customer_dto.name,
+                last_name=create_customer_dto.last_name,
+                phone_number=create_customer_dto.phone_number,
+                driver_license_id=create_customer_dto.driver_license_id,
                 status=CustomerStatusEnum.UNLOCKED,
             )
         )
@@ -70,8 +81,7 @@ class CustomerServiceV2(ICustomerService):
 
     # Deletes customer, returns ID
     def delete_customer(self, customer_id: int) -> int:
-        all_customers: list[Customer] = self.customer_repository.get_all()
-        self._find_by_id(customers_list=all_customers, customer_id=customer_id)
+        all_customers, one_customer = self._get_all_and_find(customer_id=customer_id)
 
         all_customers: list[Customer] = [
             one_customer
@@ -83,21 +93,22 @@ class CustomerServiceV2(ICustomerService):
 
     # Updates customer, returns ID
     def update_customer(
-        self, customer_id: int, updateCustomerDTO: UpdateCustomerDTO
+        self, customer_id: int, update_customer_dto: UpdateCustomerDTO
     ) -> int:
-        all_customers: list[Customer] = self.customer_repository.get_all()
-        one_customer: Customer = self._find_by_id(
-            customers_list=all_customers, customer_id=customer_id
-        )
+        all_customers, one_customer = self._get_all_and_find(customer_id=customer_id)
+
         for c in all_customers:
-            if c.phone_number == updateCustomerDTO.phone_number and c.id != customer_id:
+            if (
+                c.phone_number == update_customer_dto.phone_number
+                and c.id != customer_id
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="Customer_phone_number_already_in_database",
                 )
 
             if (
-                c.driver_license_id == updateCustomerDTO.driver_license_id
+                c.driver_license_id == update_customer_dto.driver_license_id
                 and c.id != customer_id
             ):
                 raise HTTPException(
@@ -105,20 +116,17 @@ class CustomerServiceV2(ICustomerService):
                     detail="Customer_driver_license_already_in_database",
                 )
 
-        one_customer.name = updateCustomerDTO.name
-        one_customer.last_name = updateCustomerDTO.last_name
-        one_customer.phone_number = updateCustomerDTO.phone_number
-        one_customer.driver_license_id = updateCustomerDTO.driver_license_id
+        one_customer.name = update_customer_dto.name
+        one_customer.last_name = update_customer_dto.last_name
+        one_customer.phone_number = update_customer_dto.phone_number
+        one_customer.driver_license_id = update_customer_dto.driver_license_id
 
         self.customer_repository.save_all(customers_list=all_customers)
         return customer_id
 
     # Blocks customer, returns ID
     def block_customer(self, customer_id: int) -> int:
-        all_customers: list[Customer] = self.customer_repository.get_all()
-        one_customer: Customer = self._find_by_id(
-            customers_list=all_customers, customer_id=customer_id
-        )
+        all_customers, one_customer = self._get_all_and_find(customer_id=customer_id)
 
         if one_customer.status != CustomerStatusEnum.BLOCKED:
             one_customer.status = CustomerStatusEnum.BLOCKED
@@ -131,8 +139,7 @@ class CustomerServiceV2(ICustomerService):
 
     # Unlocks customer, returns ID
     def unlock_customer(self, customer_id: int) -> int:
-        all_customers: list[Customer] = self.customer_repository.get_all()
-        one_customer: Customer = self._find_by_id(all_customers, customer_id)
+        all_customers, one_customer = self._get_all_and_find(customer_id=customer_id)
 
         if one_customer.status != CustomerStatusEnum.UNLOCKED:
             one_customer.status = CustomerStatusEnum.UNLOCKED
