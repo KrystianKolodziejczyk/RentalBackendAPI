@@ -57,7 +57,7 @@ async def get_all_cars_qty(
 async def get_one_car(
     car_id: int, inventory_service: IInventoryService = Depends(get_inventory_service)
 ) -> GetCarResponse:
-    return inventory_service.get_store_item_by_id(car_id)
+    return inventory_service.get_car_by_id(car_id)
 
 
 # ===============================

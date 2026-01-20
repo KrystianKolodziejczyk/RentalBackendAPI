@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
+from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
 
-# Get response schema
+
 class GetCarResponse(BaseModel):
+    id: int
     brand: str
     model: str
     year: int
-    id: int
+    status: RentStatusEnum
