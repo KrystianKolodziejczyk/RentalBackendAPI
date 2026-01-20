@@ -1,5 +1,5 @@
-from app.modules.rental.domain.models.car import Car
-from app.modules.rental.domain.enums.rent_status_enum import RentStatusEnum
+from app.modules.inventory.domain.models.car import Car
+from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
 
 
 # Store item class

@@ -1,27 +1,27 @@
 from fastapi import HTTPException, status
-from app.modules.rental.domain.models.car import Car
-from app.modules.rental.domain.models.store_item import StoreItem
-from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
-from app.modules.rental.domain.services.i_rental_service import IRentalService
-from app.modules.rental.domain.enums.rent_status_enum import RentStatusEnum
-from app.modules.rental.presentation.dto import (
+from app.modules.inventory.domain.models.car import Car
+from app.modules.inventory.domain.models.store_item import StoreItem
+from app.modules.inventory.domain.repositories.i_inventory_repository import IInventoryRepository
+from app.modules.inventory.domain.services.i_inventory_service import IInventoryService
+from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
+from app.modules.inventory.presentation.dto import (
     CreateCarDTO,
     UpdateCarDTO,
 )
 
 
-class RentalService(IRentalService):
-    def __init__(self, rental_repository: IRentalRepository):
-        self.rental_repository: IRentalRepository = rental_repository
+class InventoryService(IInventoryService):
+    def __init__(self, inventory_repository: IInventoryRepository):
+        self.inventory_repository: IInventoryRepository = inventory_repository
 
     # Returns all store items instances
     def get_all_cars(self) -> list[StoreItem]:
-        allCars = self.rental_repository.get_all_cars()
+        allCars = self.inventory_repository.get_all_cars()
         return [car.car for car in allCars]
 
     # Returns one store item instance by id
     def get_storeItem_by_id(self, car_id: int) -> StoreItem:
-        oneStoreItem: StoreItem = self.rental_repository.get_storeItem_by_id(car_id)
+        oneStoreItem: StoreItem = self.inventory_repository.get_storeItem_by_id(car_id)
         if oneStoreItem:
             return oneStoreItem
 
@@ -31,14 +31,14 @@ class RentalService(IRentalService):
 
     # Returns quantity of all store items
     def get_all_cars_qty(self) -> int:
-        return self.rental_repository.get_all_cars_qty()
+        return self.inventory_repository.get_all_cars_qty()
 
     # Adds new store item instance
     def add_car(self, createCarDTO: CreateCarDTO) -> int:
-        self.rental_repository.generalId += 1
-        newId: int = self.rental_repository.generalId
+        self.inventory_repository.generalId += 1
+        newId: int = self.inventory_repository.generalId
 
-        self.rental_repository.add_car(createCarDTO=createCarDTO, newId=newId)
+        self.inventory_repository.add_car(createCarDTO=createCarDTO, newId=newId)
 
         return newId
 
@@ -46,7 +46,7 @@ class RentalService(IRentalService):
     def delete_car(self, car_id: int) -> int:
         oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
         if not oneStoreItem.status == RentStatusEnum.RENTED:
-            self.rental_repository.delete_car(car_id=car_id)
+            self.inventory_repository.delete_car(car_id=car_id)
             return car_id
 
         raise HTTPException(
@@ -58,7 +58,7 @@ class RentalService(IRentalService):
     def update_car(self, car_id: int, updateCarDTO: UpdateCarDTO) -> int:
         oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
         if not oneStoreItem.status == RentStatusEnum.RENTED:
-            self.rental_repository.update_car(car_id=car_id, updateCarDTO=updateCarDTO)
+            self.inventory_repository.update_car(car_id=car_id, updateCarDTO=updateCarDTO)
             return car_id
 
         raise HTTPException(
@@ -68,7 +68,7 @@ class RentalService(IRentalService):
 
     # Returns only available store items
     def get_available_cars(self) -> list[Car]:
-        availableItems: list[StoreItem] = self.rental_repository.get_available_cars(
+        availableItems: list[StoreItem] = self.inventory_repository.get_available_cars(
             RentStatusEnum.AVAILABLE
         )
         if availableItems:

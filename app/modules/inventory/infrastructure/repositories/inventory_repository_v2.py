@@ -1,14 +1,14 @@
 from pathlib import Path
-from app.modules.rental.domain.models.store_item import StoreItem
-from app.modules.rental.domain.repositories.i_rental_repository_v2 import (
-    IRentalRepositoryV2,
+from app.modules.inventory.domain.models.store_item import StoreItem
+from app.modules.inventory.domain.repositories.i_inventory_repository_v2 import (
+    IInventoryRepositoryV2,
 )
 from app.shared.infrastructure.services.fake_database.fake_database import FakeDatabse
-from app.modules.rental.infrastructure.mappers.store_item_mapper import StoreItemMapper
+from app.modules.inventory.infrastructure.mappers.store_item_mapper import StoreItemMapper
 
 
 # Storehouse Class
-class RentalRepositoryV2(IRentalRepositoryV2):
+class InventoryRepositoryV2(IInventoryRepositoryV2):
     path: Path
 
     def __init__(self, path: Path) -> None:

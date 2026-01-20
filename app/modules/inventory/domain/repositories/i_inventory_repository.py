@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from app.modules.rental.domain.enums.rent_status_enum import RentStatusEnum
-from app.modules.rental.domain.models.car import Car
-from app.modules.rental.domain.models.store_item import StoreItem
+from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
+from app.modules.inventory.domain.models.car import Car
+from app.modules.inventory.domain.models.store_item import StoreItem
 
 
-class IRentalRepository(ABC):
+class IInventoryRepository(ABC):
     @abstractmethod
     def get_all_cars(self) -> list[StoreItem]: ...
 

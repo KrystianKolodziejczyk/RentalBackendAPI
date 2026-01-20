@@ -1,11 +1,11 @@
-from app.modules.rental.domain.models.car import Car
-from app.modules.rental.domain.enums.rent_status_enum import RentStatusEnum
-from app.modules.rental.domain.models.store_item import StoreItem
-from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
+from app.modules.inventory.domain.models.car import Car
+from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
+from app.modules.inventory.domain.models.store_item import StoreItem
+from app.modules.inventory.domain.repositories.i_inventory_repository import IInventoryRepository
 
 
 # Storehouse Class
-class RentalRepository(IRentalRepository):
+class InventoryRepository(IInventoryRepository):
     ownedCars: list[StoreItem]
     generalId: int
 
