@@ -10,6 +10,11 @@ from app.modules.rental.presentation.dto import (
     CreateCarDTO,
     UpdateCarDTO,
 )
+from app.modules.rental.domain.exceptions.rental_exceptions import (
+    CarNotFoundException,
+    CarAlreadyRentedException,
+    CarIsNotRentedException,
+)
 
 
 class RentalServiceV2(IRentalService):
@@ -22,9 +27,7 @@ class RentalServiceV2(IRentalService):
             if item.car.id == car_id:
                 return item
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="car_doesnt_exist"
-        )
+        raise CarNotFoundException(car_id=car_id)
 
     # Helper, returns tuple
     def _get_all_and_find(self, car_id: int) -> tuple[list[StoreItem], StoreItem]:
@@ -35,10 +38,7 @@ class RentalServiceV2(IRentalService):
     # Helper, checks rented status
     def _ensure_rent_status(self, item: StoreItem, action: str) -> None:
         if item.status == RentStatusEnum.RENTED:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"cant_{action}_rented_car!",
-            )
+            raise CarAlreadyRentedException(car_id=item.car.id, action=action)
 
     def _get_last_id(self, item_list: list[StoreItem]) -> int:
         if not item_list:
@@ -124,13 +124,11 @@ class RentalServiceV2(IRentalService):
         self.rental_repository.save_all(store_item_list=all_items)
         return one_item.status
 
+    # Returns rented car
     def return_car(self, car_id: int) -> RentStatusEnum:
         all_items, one_item = self._get_all_and_find(car_id=car_id)
         if one_item.status == RentStatusEnum.AVAILABLE:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="cant_return_unrented_car!",
-            )
+            raise CarIsNotRentedException(car_id=car_id)
 
         one_item.status = RentStatusEnum.AVAILABLE
         self.rental_repository.save_all(store_item_list=all_items)

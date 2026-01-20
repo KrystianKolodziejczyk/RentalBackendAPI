@@ -6,6 +6,13 @@ from app.modules.customers.domain.repositories.i_customer_repository import (
 )
 from app.modules.customers.domain.services.i_customer_service import ICustomerService
 from app.modules.customers.presentation.dto import CreateCustomerDTO, UpdateCustomerDTO
+from app.modules.customers.domain.exceptions.customer_excpetions import (
+    CustomerNotFoundExcpetion,
+    PhoneNumberInDatabesException,
+    DriverLicenseInDatabaseExpetion,
+    CustomerAlreadyBlockedException,
+    CustomerAlreadyUnlockedException,
+)
 
 
 class CustomerServiceV2(ICustomerService):
@@ -20,9 +27,7 @@ class CustomerServiceV2(ICustomerService):
             if one_customer.id == customer_id:
                 return one_customer
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="customer_doesnt_exists"
-        )
+        raise CustomerNotFoundExcpetion(customer_id=customer_id)
 
     # Helper
     def _get_last_id(self, customers_list: list[Customer]) -> int:
@@ -53,14 +58,12 @@ class CustomerServiceV2(ICustomerService):
         all_customers: list[Customer] = self.customer_repository.get_all()
         for one_customer in all_customers:
             if one_customer.phone_number == create_customer_dto.phone_number:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Customer_phone_number_already_in_database",
+                raise PhoneNumberInDatabesException(
+                    phone_number=create_customer_dto.phone_number
                 )
             if one_customer.driver_license_id == create_customer_dto.driver_license_id:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Customer_driver_license_already_in_database",
+                raise DriverLicenseInDatabaseExpetion(
+                    driver_license_id=create_customer_dto.driver_license_id
                 )
 
         new_id: int = self._get_last_id(customers_list=all_customers)
@@ -102,18 +105,15 @@ class CustomerServiceV2(ICustomerService):
                 c.phone_number == update_customer_dto.phone_number
                 and c.id != customer_id
             ):
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Customer_phone_number_already_in_database",
+                raise PhoneNumberInDatabesException(
+                    phone_number=update_customer_dto.phone_number
                 )
-
             if (
                 c.driver_license_id == update_customer_dto.driver_license_id
                 and c.id != customer_id
             ):
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Customer_driver_license_already_in_database",
+                raise DriverLicenseInDatabaseExpetion(
+                    driver_license_id=update_customer_dto.driver_license_id
                 )
 
         one_customer.name = update_customer_dto.name
@@ -133,9 +133,7 @@ class CustomerServiceV2(ICustomerService):
             self.customer_repository.save_all(customers_list=all_customers)
             return customer_id
 
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="customer_already_blocked!"
-        )
+        raise CustomerAlreadyBlockedException(customer_id=customer_id)
 
     # Unlocks customer, returns ID
     def unlock_customer(self, customer_id: int) -> int:
@@ -146,6 +144,4 @@ class CustomerServiceV2(ICustomerService):
             self.customer_repository.save_all(customers_list=all_customers)
             return customer_id
 
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="customer_wasnt_blocked"
-        )
+        raise CustomerAlreadyUnlockedException(customer_id=customer_id)
