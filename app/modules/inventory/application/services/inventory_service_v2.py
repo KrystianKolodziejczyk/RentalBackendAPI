@@ -1,17 +1,17 @@
+from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
+from app.modules.inventory.domain.exceptions.inventory_exceptions import (
+    CarAlreadyRentedException,
+    CarIsNotRentedException,
+    CarNotFoundException,
+)
 from app.modules.inventory.domain.models.car import Car
-from app.modules.inventory.domain.repositories.i_inventory_repository_v2 import (
+from app.modules.inventory.domain.repositories.i_inventory_repository_v3 import (
     IInventoryRepositoryV2,
 )
 from app.modules.inventory.domain.services.i_inventory_service import IInventoryService
-from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
 from app.modules.inventory.presentation.dto import (
     CreateCarDTO,
     UpdateCarDTO,
-)
-from app.modules.inventory.domain.exceptions.inventory_exceptions import (
-    CarNotFoundException,
-    CarAlreadyRentedException,
-    CarIsNotRentedException,
 )
 
 

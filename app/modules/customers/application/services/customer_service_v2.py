@@ -1,4 +1,3 @@
-from fastapi import HTTPException, status
 from app.modules.customers.domain.enums.customer_status_enum import CustomerStatusEnum
 from app.modules.customers.domain.models.customer import Customer
 from app.modules.customers.domain.repositories.i_customer_repository import (

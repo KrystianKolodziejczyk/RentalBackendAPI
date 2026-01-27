@@ -1,10 +1,12 @@
+from typing import Any
+
 from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
 from app.modules.inventory.domain.models.car import Car
 
 
 class CarMapper:
     @staticmethod
-    def json_to_car(car_dict: dict) -> Car:
+    def dict_to_car(car_dict: dict) -> Car:
         return Car(
             id=car_dict["id"],
             brand=car_dict["brand"],
@@ -14,7 +16,7 @@ class CarMapper:
         )
 
     @staticmethod
-    def car_to_json(car: Car) -> dict[str, str | int]:
+    def car_to_dict(car: Car) -> dict[str, Any]:
         return {
             "id": car.id,
             "brand": car.brand,

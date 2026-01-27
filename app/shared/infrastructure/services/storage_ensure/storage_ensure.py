@@ -7,10 +7,10 @@ class StorageEnsure(IStorageEnsure):
     def get_path(file_name: str) -> Path:
         root = Path.cwd().resolve()
         database_dir = root / "database"
-        json_file_path = database_dir / file_name
+        databae_db = database_dir / file_name
 
-        if not json_file_path.exists():
+        if not databae_db.exists():
             database_dir.mkdir(parents=True, exist_ok=True)
-            json_file_path.write_text(data="[]")
+            databae_db.touch(exist_ok=True)
 
-        return json_file_path
+        return databae_db
