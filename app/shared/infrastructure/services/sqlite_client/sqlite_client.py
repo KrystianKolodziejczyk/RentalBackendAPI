@@ -19,7 +19,9 @@ class SqliteClient(ISqliteClient):
             conn.row_factory = aiosqlite.Row
             yield conn
 
-    async def fetch_one(self, query: str, params: tuple | dict | None = None) -> dict[str, Any]:
+    async def fetch_one(
+        self, query: str, params: tuple | dict | None = None
+    ) -> dict[str, Any]:
         async with self._get_connection() as conn:
             cursor = await conn.execute(query, params)
             row = await cursor.fetchone()
@@ -28,10 +30,12 @@ class SqliteClient(ISqliteClient):
                 return None
             return dict(row)
 
-    async def fetch_all(self, query: str, params: tuple | dict | None = None) -> list[dict]:
+    async def fetch_all(
+        self, query: str, params: tuple | dict | None = None
+    ) -> list[dict]:
         async with self._get_connection() as conn:
             cursor = await conn.execute(query, params)
-            rows = cursor.fetchall()
+            rows = await cursor.fetchall()
 
             if rows is None:
                 return None
@@ -42,11 +46,16 @@ class SqliteClient(ISqliteClient):
             cursor = await conn.execute(query, params)
             await conn.commit()
 
+            if cursor.lastrowid:
+                return cursor.lastrowid
+
             return cursor.rowcount
 
-    async def execute_many(self, query: str, params_list: list[tuple | dict] | None = None) -> int:
+    async def execute_many(
+        self, query: str, params_list: list[tuple | dict] | None = None
+    ) -> int:
         async with self._get_connection() as conn:
-            cursor = await conn.execute(query, params_list)
+            cursor = await conn.executemany(query, params_list)
             await conn.commit()
 
             return cursor.rowcount

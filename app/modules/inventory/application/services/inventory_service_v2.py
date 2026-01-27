@@ -5,7 +5,7 @@ from app.modules.inventory.domain.exceptions.inventory_exceptions import (
     CarNotFoundException,
 )
 from app.modules.inventory.domain.models.car import Car
-from app.modules.inventory.domain.repositories.i_inventory_repository_v3 import (
+from app.modules.inventory.domain.repositories.i_inventory_repository_v2 import (
     IInventoryRepositoryV2,
 )
 from app.modules.inventory.domain.services.i_inventory_service import IInventoryService

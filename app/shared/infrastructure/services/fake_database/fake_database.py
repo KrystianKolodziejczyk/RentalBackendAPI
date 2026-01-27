@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from app.shared.domain.services.fake_database.i_fake_database import IFakeDatabase
+
+from app.shared.domain.services.i_fake_database.i_fake_database import IFakeDatabase
 
 
 class FakeDatabse(IFakeDatabase):
