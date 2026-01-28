@@ -43,9 +43,8 @@ _inventory_service: IInventoryServiceV2 = InventoryServiceV3(
 # ====== Customers =======
 
 
-_customer_repository: ICustomerRepository = CustomerRepositoryV3(
-    path=StorageEnsure.get_path("rental_database.db")
-)
+_customer_repository: ICustomerRepository = CustomerRepositoryV3(db_client=_db_client)
+
 _customer_service: ICustomerService = CustomerServiceV3(
     customer_repository=_customer_repository
 )
