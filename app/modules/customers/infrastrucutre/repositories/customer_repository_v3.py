@@ -18,6 +18,22 @@ class CustomerRepositoryV3(ICustomerRepository):
     def __init__(self, db_client: ISqliteClient):
         self._db_client = db_client
 
+    def _return_excetion(self, exception: IntegrityError, customer_dict: dict) -> None:
+        error_message: str = str(exception).lower()
+
+        if "phone_number" in error_message:
+            raise PhoneNumberInDatabesException(
+                phone_number=customer_dict["phone_number"]
+            )
+
+        elif "driver_license_id" in error_message:
+            raise DriverLicenseInDatabaseExpetion(
+                driver_license_id=customer_dict["driver_license_id"]
+            )
+
+        else:
+            raise IntegrityError(f"Database constrain Violation: {exception}")
+
     async def get_customer_by_id(self, customer_id: int) -> Customer:
         query: str = """
         SELECT * FROM customers WHERE id = ?;
@@ -25,6 +41,8 @@ class CustomerRepositoryV3(ICustomerRepository):
         customer_dict: dict = await self._db_client.fetch_one(
             query=query, params=(customer_id,)
         )
+        if not customer_dict:
+            return None
 
         return CustomerMapper.dict_to_customer(customer_dict=customer_dict)
 
@@ -48,18 +66,22 @@ class CustomerRepositoryV3(ICustomerRepository):
         VALUES (?, ?, ?, ?, ?);
         """
 
-        new_id: int = await self._db_client.execute(
-            query=query,
-            params=(
-                customer_dict["name"],
-                customer_dict["last_name"],
-                customer_dict["phone_number"],
-                customer_dict["driver_license_id"],
-                customer_dict["status"],
-            ),
-        )
+        try:
+            new_id: int = await self._db_client.execute(
+                query=query,
+                params=(
+                    customer_dict["name"],
+                    customer_dict["last_name"],
+                    customer_dict["phone_number"],
+                    customer_dict["driver_license_id"],
+                    customer_dict["status"],
+                ),
+            )
 
-        return new_id
+            return new_id
+
+        except IntegrityError as e:
+            self._return_excetion(exception=e, customer_dict=customer_dict)
 
     async def delete_customer(self, customer_id: int) -> int:
         query: str = "DELETE FROM customers WHERE id = ?"
@@ -92,26 +114,13 @@ class CustomerRepositoryV3(ICustomerRepository):
             return customer_id
 
         except IntegrityError as e:
-            error_message: str = str(e).lower()
-
-            if "phone_number" in error_message:
-                raise PhoneNumberInDatabesException(
-                    phone_number=customer_dict["phone_number"]
-                )
-
-            elif "driver_license_id" in error_message:
-                raise DriverLicenseInDatabaseExpetion(
-                    driver_license_id=customer_dict["driver_license_id"]
-                )
-
-            else:
-                raise IntegrityError(f"Database constrain Violation: {e}")
+            self._return_excetion(exception=e, customer_dict=customer_dict)
 
     async def change_status_customer(self, customer_id: int, new_status: str) -> int:
         query: str = """
         UPDATE customers
-        SET status = ?,
-        WHERE id = ?
+        SET status = ?
+        WHERE id = ?;
         """
 
         await self._db_client.execute(query=query, params=(new_status, customer_id))

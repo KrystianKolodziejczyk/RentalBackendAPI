@@ -21,16 +21,16 @@ class CustomerServiceV3(ICustomerService):
         self._customer_repository = customer_repository
 
     # Helper
-    def _check_customer_blocked(self, customer: Customer) -> None:
+    def _check_customer_blocked(self, customer: Customer, customer_id: int) -> None:
         if customer.status == CustomerStatusEnum.BLOCKED:
-            raise CustomerAlreadyBlockedException
+            raise CustomerAlreadyBlockedException(customer_id=customer_id)
 
     # Helper gets customer and checks existence
     async def _get_customer_and_check(self, customer_id: int) -> Customer:
         customer: Customer = await self._customer_repository.get_customer_by_id(
             customer_id=customer_id
         )
-        if not customer:
+        if customer is None:
             raise CustomerNotFoundExcpetion(customer_id=customer_id)
 
         return customer
@@ -52,7 +52,7 @@ class CustomerServiceV3(ICustomerService):
                 last_name=create_customer_dto.last_name,
                 phone_number=create_customer_dto.phone_number,
                 driver_license_id=create_customer_dto.driver_license_id,
-                status=CustomerStatusEnum.UNLOCKED.value,
+                status=CustomerStatusEnum.UNLOCKED,
             )
         )
 
@@ -61,7 +61,7 @@ class CustomerServiceV3(ICustomerService):
     # Deletes customer
     async def delete_customer(self, customer_id: int) -> int:
         customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
-        self._check_customer_blocked(customer=customer)
+        self._check_customer_blocked(customer=customer, customer_id=customer_id)
 
         await self._customer_repository.delete_customer(customer_id=customer_id)
         return customer_id
@@ -75,6 +75,7 @@ class CustomerServiceV3(ICustomerService):
         customer.name = update_customer_dto.name
         customer.last_name = update_customer_dto.last_name
         customer.phone_number = update_customer_dto.phone_number
+        customer.driver_license_id = update_customer_dto.driver_license_id
 
         try:
             await self._customer_repository.update_customer(
@@ -89,23 +90,23 @@ class CustomerServiceV3(ICustomerService):
             raise
 
     # Blocks customer
-    async def block_customer(self, customer_id: int) -> str:
+    async def block_customer(self, customer_id: int) -> int:
         customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
-        self._check_customer_blocked(customer=customer)
+        self._check_customer_blocked(customer=customer, customer_id=customer_id)
 
         await self._customer_repository.change_status_customer(
-            customer_id=customer_id, status=CustomerStatusEnum.BLOCKED.value
+            customer_id=customer_id, new_status=CustomerStatusEnum.BLOCKED.value
         )
-        return CustomerStatusEnum.BLOCKED.value
+        return customer_id
 
     # Unlocks customer
-    async def unlock_customer(self, customer_id: int) -> str:
+    async def unlock_customer(self, customer_id: int) -> int:
         customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
 
         if customer.status == CustomerStatusEnum.UNLOCKED:
-            raise CustomerAlreadyUnlockedException
+            raise CustomerAlreadyUnlockedException(customer_id=customer_id)
 
         await self._customer_repository.change_status_customer(
-            customer_id=customer_id, status=CustomerStatusEnum.UNLOCKED.value
+            customer_id=customer_id, new_status=CustomerStatusEnum.UNLOCKED.value
         )
-        return CustomerStatusEnum.UNLOCKED.value
+        return customer_id

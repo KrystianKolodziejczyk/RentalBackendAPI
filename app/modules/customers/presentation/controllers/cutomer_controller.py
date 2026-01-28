@@ -42,7 +42,7 @@ async def get_customer_by_id(
     customer_id: int,
     customer_service: ICustomerService = Depends(get_customer_service),
 ) -> GetCustomerResponse:
-    return await customer_service.get_customer_by_id(customer_id)
+    return await customer_service.get_customer_by_id(customer_id=customer_id)
 
 
 # ===============================
