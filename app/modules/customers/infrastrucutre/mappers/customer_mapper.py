@@ -1,10 +1,10 @@
-from app.modules.customers.domain.models.customer import Customer
 from app.modules.customers.domain.enums.customer_status_enum import CustomerStatusEnum
+from app.modules.customers.domain.models.customer import Customer
 
 
 class CustomerMapper:
     @staticmethod
-    def json_to_customer(customer_dict: dict) -> Customer:
+    def dict_to_customer(customer_dict: dict) -> Customer:
         return Customer(
             id=customer_dict["id"],
             name=customer_dict["name"],
@@ -15,7 +15,7 @@ class CustomerMapper:
         )
 
     @staticmethod  # Probably to delete
-    def customer_to_json(customer: Customer) -> dict[str, str | int]:
+    def customer_to_dict(customer: Customer) -> dict[str, str | int]:
         return {
             "id": customer.id,
             "name": customer.name,

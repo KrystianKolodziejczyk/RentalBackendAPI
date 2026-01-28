@@ -1,12 +1,12 @@
-from app.modules.customers.application.services.customer_service_v2 import (
-    CustomerServiceV2,
+from app.modules.customers.application.services.customer_service_v3 import (
+    CustomerServiceV3,
 )
 from app.modules.customers.domain.repositories.i_customer_repository import (
     ICustomerRepository,
 )
 from app.modules.customers.domain.services.i_customer_service import ICustomerService
-from app.modules.customers.infrastrucutre.repositories.customer_repository_v2 import (
-    CustomerRepositoryV2,
+from app.modules.customers.infrastrucutre.repositories.customer_repository_v3 import (
+    CustomerRepositoryV3,
 )
 from app.modules.inventory.application.services.inventory_service_v3 import (
     InventoryServiceV3,
@@ -30,23 +30,33 @@ _db_client: ISqliteClient = SqliteClient(
     path=StorageEnsure.get_path("rental_database.db")
 )
 
+# ====== Inventory =======
+
+
 _inventory_repository: IInventoryRepositoryV3 = InventoryRepositoryV3(
     db_client=_db_client
 )
 _inventory_service: IInventoryServiceV2 = InventoryServiceV3(
     inventory_repository=_inventory_repository
 )
-_customer_repository: ICustomerRepository = CustomerRepositoryV2(
-    path=StorageEnsure.get_path("customers.json")
+
+# ====== Customers =======
+
+
+_customer_repository: ICustomerRepository = CustomerRepositoryV3(
+    path=StorageEnsure.get_path("rental_database.db")
 )
-_customer_service: ICustomerService = CustomerServiceV2(
+_customer_service: ICustomerService = CustomerServiceV3(
     customer_repository=_customer_repository
 )
+
+
+# ======= Getters ========
 
 
 def get_inventory_service() -> InventoryServiceV3:
     return _inventory_service
 
 
-def get_customer_service() -> CustomerServiceV2:
+def get_customer_service() -> CustomerServiceV3:
     return _customer_service
