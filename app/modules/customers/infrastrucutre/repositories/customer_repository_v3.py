@@ -18,6 +18,7 @@ class CustomerRepositoryV3(ICustomerRepository):
     def __init__(self, db_client: ISqliteClient):
         self._db_client = db_client
 
+    # Helper
     def _return_excetion(self, exception: IntegrityError, customer_dict: dict) -> None:
         error_message: str = str(exception).lower()
 
@@ -34,6 +35,7 @@ class CustomerRepositoryV3(ICustomerRepository):
         else:
             raise IntegrityError(f"Database constrain Violation: {exception}")
 
+    # Gets one customer
     async def get_customer_by_id(self, customer_id: int) -> Customer:
         query: str = """
         SELECT * FROM customers WHERE id = ?;
@@ -46,6 +48,7 @@ class CustomerRepositoryV3(ICustomerRepository):
 
         return CustomerMapper.dict_to_customer(customer_dict=customer_dict)
 
+    # Gets all customers
     async def get_all_customers(self) -> list[Customer]:
         query: str = """
         SELECT * FROM customers;
@@ -59,6 +62,7 @@ class CustomerRepositoryV3(ICustomerRepository):
             for one_customer in list_dict_customers
         ]
 
+    # Adds new customer
     async def add_customer(self, customer: Customer) -> int:
         customer_dict: dict = CustomerMapper.customer_to_dict(customer=customer)
         query: str = """
@@ -83,12 +87,14 @@ class CustomerRepositoryV3(ICustomerRepository):
         except IntegrityError as e:
             self._return_excetion(exception=e, customer_dict=customer_dict)
 
+    # Deletes customer
     async def delete_customer(self, customer_id: int) -> int:
         query: str = "DELETE FROM customers WHERE id = ?"
         await self._db_client.execute(query=query, params=(customer_id,))
 
         return customer_id
 
+    # Updates customer
     async def update_customer(self, customer_id: int, customer: Customer) -> int:
         customer_dict: dict = CustomerMapper.customer_to_dict(customer=customer)
         query: str = """
@@ -116,6 +122,7 @@ class CustomerRepositoryV3(ICustomerRepository):
         except IntegrityError as e:
             self._return_excetion(exception=e, customer_dict=customer_dict)
 
+    # Chagnes customer status
     async def change_status_customer(self, customer_id: int, new_status: str) -> int:
         query: str = """
         UPDATE customers
