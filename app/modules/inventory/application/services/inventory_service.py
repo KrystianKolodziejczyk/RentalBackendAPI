@@ -1,107 +1,87 @@
-from fastapi import HTTPException, status
-from app.modules.inventory.domain.models.car import Car
-from app.modules.inventory.domain.models.store_item import StoreItem
-from app.modules.inventory.domain.repositories.i_inventory_repository import IInventoryRepository
-from app.modules.inventory.domain.services.i_inventory_service import IInventoryService
 from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
-from app.modules.inventory.presentation.dto import (
-    CreateCarDTO,
-    UpdateCarDTO,
+from app.modules.inventory.domain.exceptions.inventory_exceptions import (
+    CarAlreadyRentedException,
+    CarNotFoundException,
 )
+from app.modules.inventory.domain.models.car import Car
+from app.modules.inventory.domain.repositories.i_inventory_repository import (
+    IInventoryRepository,
+)
+from app.modules.inventory.domain.services.i_inventory_service import (
+    IInventoryService,
+)
+from app.modules.inventory.presentation.dto import CreateCarDTO, UpdateCarDTO
 
 
 class InventoryService(IInventoryService):
+    _inventory_repository: IInventoryRepository
+
     def __init__(self, inventory_repository: IInventoryRepository):
-        self.inventory_repository: IInventoryRepository = inventory_repository
+        self._inventory_repository = inventory_repository
 
-    # Returns all store items instances
-    def get_all_cars(self) -> list[StoreItem]:
-        allCars = self.inventory_repository.get_all_cars()
-        return [car.car for car in allCars]
+    # Helper looks for car
+    async def _get_car_and_check(self, car_id: int) -> Car:
+        car: Car = await self._inventory_repository.get_car_by_id(car_id=car_id)
+        if not car:
+            raise CarNotFoundException(car_id=car_id)
 
-    # Returns one store item instance by id
-    def get_storeItem_by_id(self, car_id: int) -> StoreItem:
-        oneStoreItem: StoreItem = self.inventory_repository.get_storeItem_by_id(car_id)
-        if oneStoreItem:
-            return oneStoreItem
+        return car
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="car_doesn't_exist"
+    # Helper checks car rent
+    def _check_car_rent(self, car: Car) -> None:
+        if car.status == RentStatusEnum.RENTED:
+            raise CarAlreadyRentedException
+
+    # Returns all cars
+    async def get_all_cars(self) -> list[Car]:
+        return await self._inventory_repository.get_all_cars()
+
+    # Gets car by id
+    async def get_car_by_id(self, car_id: int) -> Car:
+        return await self._get_car_and_check(car_id=car_id)
+
+    # Get all cars qty
+    async def get_all_cars_qty(self) -> int:
+        return await self._inventory_repository.get_all_cars_qty()
+
+    # Adds new car
+    async def add_car(self, create_car_dto: CreateCarDTO) -> int:
+        new_id: int = await self._inventory_repository.add_car(
+            car=Car(
+                id=-1,
+                brand=create_car_dto.brand,
+                model=create_car_dto.model,
+                year=create_car_dto.year,
+            )
         )
 
-    # Returns quantity of all store items
-    def get_all_cars_qty(self) -> int:
-        return self.inventory_repository.get_all_cars_qty()
+        return new_id
 
-    # Adds new store item instance
-    def add_car(self, createCarDTO: CreateCarDTO) -> int:
-        self.inventory_repository.generalId += 1
-        newId: int = self.inventory_repository.generalId
+    # Deletes car
+    async def delete_car(self, car_id: int) -> int:
+        car: Car = await self._get_car_and_check(car_id=car_id)
+        self._check_car_rent(car=car)
 
-        self.inventory_repository.add_car(createCarDTO=createCarDTO, newId=newId)
+        await self._inventory_repository.delete_car(car_id=car_id)
+        return car_id
 
-        return newId
+    # Updates car
+    async def update_car(self, car_id: int, update_car_dto: UpdateCarDTO) -> int:
+        car: Car = await self._get_car_and_check(car_id=car_id)
+        self._check_car_rent(car=car)
 
-    # Deletes one store item instance
-    def delete_car(self, car_id: int) -> int:
-        oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
-        if not oneStoreItem.status == RentStatusEnum.RENTED:
-            self.inventory_repository.delete_car(car_id=car_id)
-            return car_id
+        car.brand = update_car_dto.brand
+        car.model = update_car_dto.model
+        car.year = update_car_dto.year
 
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="cant_delete_rented_car",
-        )
+        await self._inventory_repository.update_car(car_id=car_id, car=car)
+        return car_id
 
-    # Updates selected car info
-    def update_car(self, car_id: int, updateCarDTO: UpdateCarDTO) -> int:
-        oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
-        if not oneStoreItem.status == RentStatusEnum.RENTED:
-            self.inventory_repository.update_car(car_id=car_id, updateCarDTO=updateCarDTO)
-            return car_id
+    # Gets available cars
+    async def get_available_cars(self) -> list[Car]:
+        return await self._inventory_repository.get_available_cars()
 
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="cant_change_rented_car!",
-        )
-
-    # Returns only available store items
-    def get_available_cars(self) -> list[Car]:
-        availableItems: list[StoreItem] = self.inventory_repository.get_available_cars(
-            RentStatusEnum.AVAILABLE
-        )
-        if availableItems:
-            return [oneItem.car for oneItem in availableItems]
-
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="no_available_cars"
-        )
-
-    # Checks and returns availabilty of one car
-    def check_car_availability(self, car_id: int) -> RentStatusEnum:
-        oneStoreItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
-        return oneStoreItem.status
-
-    # Changes item's status to Rented
-    def rent_car(self, car_id: int) -> RentStatusEnum:
-        oneItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
-        if not oneItem.status == RentStatusEnum.RENTED:
-            oneItem.status = RentStatusEnum.RENTED
-            return oneItem.status
-
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="car_already_rented",
-        )
-
-    def return_car(self, car_id: int) -> RentStatusEnum:
-        oneItem: StoreItem = self.get_storeItem_by_id(car_id=car_id)
-        if not oneItem.status == RentStatusEnum.AVAILABLE:
-            oneItem.status = RentStatusEnum.AVAILABLE
-            return oneItem.status
-
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="car_already_rented",
-        )
+    # Returns car status
+    async def check_car_status(self, car_id: int) -> str:
+        car: Car = await self._get_car_and_check(car_id=car_id)
+        return car.status.value

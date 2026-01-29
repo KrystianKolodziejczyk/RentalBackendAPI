@@ -1,68 +1,64 @@
 from app.modules.inventory.domain.models.car import Car
-from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
-from app.modules.inventory.domain.models.store_item import StoreItem
-from app.modules.inventory.domain.repositories.i_inventory_repository import IInventoryRepository
+from app.modules.inventory.domain.repositories.i_inventory_repository import (
+    IInventoryRepository,
+)
+from app.modules.inventory.infrastructure.mappers.car_mapper import CarMapper
+from app.shared.domain.services.i_sqlite_client.i_sqlite_client import ISqliteClient
 
 
-# Storehouse Class
 class InventoryRepository(IInventoryRepository):
-    ownedCars: list[StoreItem]
-    generalId: int
+    _db_client: ISqliteClient
 
-    def __init__(self) -> None:
-        self.ownedCars = []
-        self.generalId = 0
+    def __init__(self, db_client: ISqliteClient) -> None:
+        self._db_client = db_client
 
-    # Returns list of all instances
-    def get_all_cars(self) -> list[StoreItem]:
-        return self.ownedCars
+    # Returns one car from DB
+    async def get_car_by_id(self, car_id: int) -> Car:
+        query: str = "SELECT * FROM cars WHERE id = ?"
+        car_dict: dict = await self._db_client.fetch_one(query=query, params=(car_id,))
+        if not car_dict:
+            return None
 
-    # Returns store's item instance
-    def get_car_by_id(self, car_id: int) -> StoreItem:
-        for item in self.ownedCars:
-            if item.car.id == car_id:
-                return item
+        return CarMapper.dict_to_car(car_dict=car_dict)
 
-    def get_all_cars_qty(self) -> int:
-        return int(len(self.ownedCars))
+    # Returns all cars from DB
+    async def get_all_cars(self) -> list[Car]:
+        query: str = "SELECT * FROM cars"
+        list_car_dict: list[dict] = await self._db_client.fetch_all(query=query)
+        return [CarMapper.dict_to_car(car_dict) for car_dict in list_car_dict]
 
-    def add_car(self, createCarDTO: Car, newId: int) -> None:
-        newCar: StoreItem = StoreItem(
-            car=Car(
-                id=newId,
-                brand=createCarDTO.brand,
-                model=createCarDTO.model,
-                year=createCarDTO.year,
-            ),
-            status=RentStatusEnum.AVAILABLE,
+    # Returns all cars qty from DB
+    async def get_all_cars_qty(self) -> int:
+        query: str = "SELECT COUNT(id) as cars_qty FROM cars"
+        cars_qty: dict = await self._db_client.fetch_one(query=query)
+
+        return cars_qty["cars_qty"]
+
+    # Adds new car to DB
+    async def add_car(self, car: Car) -> int:
+        query: str = "INSERT INTO cars (brand, model, year) VALUES (?, ?, ?)"
+        car_dict: dict = CarMapper.car_to_dict(car=car)
+        new_id: int = await self._db_client.execute(
+            query=query, params=(car_dict["brand"], car_dict["model"], car_dict["year"])
         )
-        self.ownedCars.append(newCar)
 
-    def delete_car(self, car_id: int) -> None:
-        for item in self.ownedCars:
-            if item.car.id == car_id:
-                self.ownedCars.remove(item)
+        return new_id
 
-    def update_car(self, car_id: int, updateCarDTO: Car) -> None:
-        for item in self.ownedCars:
-            if item.car.id == car_id:
-                item.car.brand = updateCarDTO.brand
-                item.car.model = updateCarDTO.model
-                item.car.year = updateCarDTO.year
+    # Deletes car from DB
+    async def delete_car(self, car_id: int) -> None:
+        query: str = "DELETE FROM cars WHERE id = ?"
+        await self._db_client.execute(query=query, params=(car_id,))
 
-    def get_available_cars(self) -> list[StoreItem]:
-        return [
-            item.car
-            for item in self.ownedCars
-            if item.status == RentStatusEnum.AVAILABLE
-        ]
+    # Updates car in DB
+    async def update_car(self, car_id: int, car: Car) -> None:
+        query: str = "UPDATE cars SET brand = ?, model = ?, year = ? WHERE id = ?"
+        car_dict: dict = CarMapper.car_to_dict(car=car)
+        await self._db_client.execute(
+            query=query,
+            params=(car_dict["brand"], car_dict["model"], car_dict["year"], car_id),
+        )
 
-    def find_available_car(self, car_id) -> RentStatusEnum | bool:
-        for item in self.ownedCars:
-            if car_id == item.car.id and item.status == RentStatusEnum.AVAILABLE:
-                return RentStatusEnum.AVAILABLE
-
-            elif car_id == item.car.id and item.status == RentStatusEnum.RENTED:
-                return RentStatusEnum.RENTED
-
-        return False
+    async def get_available_cars(self) -> list[Car]:
+        query: str = "SELECT * FROM cars WHERE status = 'available'"
+        list_car_dict: list[dict] = await self._db_client.fetch_all(query=query)
+        return [CarMapper.dict_to_car(car_dict) for car_dict in list_car_dict]

@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 # ===== Exceptions ======
 
 
-class CustomerNotFoundExcpetion(HTTPException):
+class CustomerNotFoundException(HTTPException):
     def __init__(self, customer_id: int):
         self.customer_id = customer_id
         super().__init__(
@@ -15,7 +15,7 @@ class CustomerNotFoundExcpetion(HTTPException):
 # =======================
 
 
-class PhoneNumberInDatabesException(HTTPException):
+class PhoneNumberInDatabaseException(HTTPException):
     def __init__(self, phone_number: int):
         self.phone_number = phone_number
         super().__init__(
@@ -27,12 +27,12 @@ class PhoneNumberInDatabesException(HTTPException):
 # =======================
 
 
-class DriverLicenseInDatabaseExpetion(HTTPException):
+class DriverLicenseInDatabaseException(HTTPException):
     def __init__(self, driver_license_id: str):
         self.driver_license_id = driver_license_id
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Driver License id: {driver_license_id} already in Databse",
+            detail=f"Driver License id: {driver_license_id} already in database",
         )
 
 

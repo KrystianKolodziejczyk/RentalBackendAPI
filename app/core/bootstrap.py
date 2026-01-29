@@ -3,7 +3,7 @@ from app.modules.inventory.presentation.controllers.inventory_controller import 
     router as inventory_router,
 )
 
-from app.modules.customers.presentation.controllers.cutomer_controller import (
+from app.modules.customers.presentation.controllers.customer_controller import (
     router as customer_router,
 )
 

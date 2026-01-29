@@ -1,39 +1,39 @@
 from aiosqlite import IntegrityError
 
-from app.modules.customers.domain.exceptions.customer_excpetions import (
-    DriverLicenseInDatabaseExpetion,
-    PhoneNumberInDatabesException,
+from app.modules.customers.domain.exceptions.customer_exceptions import (
+    DriverLicenseInDatabaseException,
+    PhoneNumberInDatabaseException,
 )
 from app.modules.customers.domain.models.customer import Customer
 from app.modules.customers.domain.repositories.i_customer_repository import (
     ICustomerRepository,
 )
-from app.modules.customers.infrastrucutre.mappers.customer_mapper import CustomerMapper
+from app.modules.customers.infrastructure.mappers.customer_mapper import CustomerMapper
 from app.shared.domain.services.i_sqlite_client.i_sqlite_client import ISqliteClient
 
 
-class CustomerRepositoryV3(ICustomerRepository):
+class CustomerRepository(ICustomerRepository):
     _db_client: ISqliteClient
 
     def __init__(self, db_client: ISqliteClient):
         self._db_client = db_client
 
     # Helper
-    def _return_excetion(self, exception: IntegrityError, customer_dict: dict) -> None:
+    def _return_exception(self, exception: IntegrityError, customer_dict: dict) -> None:
         error_message: str = str(exception).lower()
 
         if "phone_number" in error_message:
-            raise PhoneNumberInDatabesException(
+            raise PhoneNumberInDatabaseException(
                 phone_number=customer_dict["phone_number"]
             )
 
         elif "driver_license_id" in error_message:
-            raise DriverLicenseInDatabaseExpetion(
+            raise DriverLicenseInDatabaseException(
                 driver_license_id=customer_dict["driver_license_id"]
             )
 
         else:
-            raise IntegrityError(f"Database constrain Violation: {exception}")
+            raise IntegrityError(f"Database constraint violation: {exception}")
 
     # Gets one customer
     async def get_customer_by_id(self, customer_id: int) -> Customer:
@@ -85,7 +85,7 @@ class CustomerRepositoryV3(ICustomerRepository):
             return new_id
 
         except IntegrityError as e:
-            self._return_excetion(exception=e, customer_dict=customer_dict)
+            self._return_exception(exception=e, customer_dict=customer_dict)
 
     # Deletes customer
     async def delete_customer(self, customer_id: int) -> int:
@@ -120,9 +120,9 @@ class CustomerRepositoryV3(ICustomerRepository):
             return customer_id
 
         except IntegrityError as e:
-            self._return_excetion(exception=e, customer_dict=customer_dict)
+            self._return_exception(exception=e, customer_dict=customer_dict)
 
-    # Chagnes customer status
+    # Changes customer status
     async def change_status_customer(self, customer_id: int, new_status: str) -> int:
         query: str = """
         UPDATE customers

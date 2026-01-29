@@ -1,24 +1,24 @@
-from app.modules.customers.application.services.customer_service_v3 import (
-    CustomerServiceV3,
+from app.modules.customers.application.services.customer_service import (
+    CustomerService,
 )
 from app.modules.customers.domain.repositories.i_customer_repository import (
     ICustomerRepository,
 )
 from app.modules.customers.domain.services.i_customer_service import ICustomerService
-from app.modules.customers.infrastrucutre.repositories.customer_repository_v3 import (
-    CustomerRepositoryV3,
+from app.modules.customers.infrastructure.repositories.customer_repository import (
+    CustomerRepository,
 )
-from app.modules.inventory.application.services.inventory_service_v3 import (
-    InventoryServiceV3,
+from app.modules.inventory.application.services.inventory_service import (
+    InventoryService,
 )
-from app.modules.inventory.domain.repositories.i_inventory_repository_v2 import (
-    IInventoryRepositoryV3,
+from app.modules.inventory.domain.repositories.i_inventory_repository import (
+    IInventoryRepository,
 )
-from app.modules.inventory.domain.services.i_inventory_service_v2 import (
-    IInventoryServiceV2,
+from app.modules.inventory.domain.services.i_inventory_service import (
+    IInventoryService,
 )
-from app.modules.inventory.infrastructure.repositories.inventory_repository_v3 import (
-    InventoryRepositoryV3,
+from app.modules.inventory.infrastructure.repositories.inventory_repository import (
+    InventoryRepository,
 )
 from app.shared.domain.services.i_sqlite_client.i_sqlite_client import ISqliteClient
 from app.shared.infrastructure.services.sqlite_client.sqlite_client import SqliteClient
@@ -33,19 +33,19 @@ _db_client: ISqliteClient = SqliteClient(
 # ====== Inventory =======
 
 
-_inventory_repository: IInventoryRepositoryV3 = InventoryRepositoryV3(
+_inventory_repository: IInventoryRepository = InventoryRepository(
     db_client=_db_client
 )
-_inventory_service: IInventoryServiceV2 = InventoryServiceV3(
+_inventory_service: IInventoryService = InventoryService(
     inventory_repository=_inventory_repository
 )
 
 # ====== Customers =======
 
 
-_customer_repository: ICustomerRepository = CustomerRepositoryV3(db_client=_db_client)
+_customer_repository: ICustomerRepository = CustomerRepository(db_client=_db_client)
 
-_customer_service: ICustomerService = CustomerServiceV3(
+_customer_service: ICustomerService = CustomerService(
     customer_repository=_customer_repository
 )
 
@@ -53,9 +53,9 @@ _customer_service: ICustomerService = CustomerServiceV3(
 # ======= Getters ========
 
 
-def get_inventory_service() -> InventoryServiceV3:
+def get_inventory_service() -> InventoryService:
     return _inventory_service
 
 
-def get_customer_service() -> CustomerServiceV3:
+def get_customer_service() -> CustomerService:
     return _customer_service

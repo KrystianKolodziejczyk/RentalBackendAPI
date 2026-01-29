@@ -14,7 +14,7 @@ from app.modules.customers.presentation.response import (
 
 router = APIRouter()
 
-# ===== Rental Controller =======
+# ===== Customer Controller =======
 
 # ===============================
 

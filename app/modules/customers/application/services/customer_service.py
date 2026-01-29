@@ -1,5 +1,11 @@
-from fastapi import HTTPException, status
 from app.modules.customers.domain.enums.customer_status_enum import CustomerStatusEnum
+from app.modules.customers.domain.exceptions.customer_exceptions import (
+    CustomerAlreadyBlockedException,
+    CustomerAlreadyUnlockedException,
+    CustomerNotFoundException,
+    DriverLicenseInDatabaseException,
+    PhoneNumberInDatabaseException,
+)
 from app.modules.customers.domain.models.customer import Customer
 from app.modules.customers.domain.repositories.i_customer_repository import (
     ICustomerRepository,
@@ -9,107 +15,98 @@ from app.modules.customers.presentation.dto import CreateCustomerDTO, UpdateCust
 
 
 class CustomerService(ICustomerService):
-    def __init__(self, customerRepository: ICustomerRepository):
-        self.customer_repository = customerRepository
+    _customer_repository: ICustomerRepository
 
-    # Returns all customers list
-    def get_all_customers(self) -> list[Customer]:
-        return self.customer_repository.get_all_customers()
+    def __init__(self, customer_repository: ICustomerRepository) -> None:
+        self._customer_repository = customer_repository
 
-    # Returns customer
-    def get_customer_by_id(self, customer_id: int) -> Customer:
-        customer: Customer = self.customer_repository.get_customer_by_id(customer_id)
-        if customer:
-            return customer
+    # Helper
+    def _check_customer_blocked(self, customer: Customer, customer_id: int) -> None:
+        if customer.status == CustomerStatusEnum.BLOCKED:
+            raise CustomerAlreadyBlockedException(customer_id=customer_id)
 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="customer_doesnt_exist!"
+    # Helper gets customer and checks existence
+    async def _get_customer_and_check(self, customer_id: int) -> Customer:
+        customer: Customer = await self._customer_repository.get_customer_by_id(
+            customer_id=customer_id
+        )
+        if customer is None:
+            raise CustomerNotFoundException(customer_id=customer_id)
+
+        return customer
+
+    # Returns one customer
+    async def get_customer_by_id(self, customer_id: int) -> Customer:
+        return await self._get_customer_and_check(customer_id=customer_id)
+
+    # Returns all customers
+    async def get_all_customers(self) -> list[Customer]:
+        return await self._customer_repository.get_all_customers()
+
+    # Adds new customer
+    async def add_customer(self, create_customer_dto: CreateCustomerDTO) -> int:
+        new_id: int = await self._customer_repository.add_customer(
+            customer=Customer(
+                id=-1,
+                name=create_customer_dto.name,
+                last_name=create_customer_dto.last_name,
+                phone_number=create_customer_dto.phone_number,
+                driver_license_id=create_customer_dto.driver_license_id,
+                status=CustomerStatusEnum.UNLOCKED,
+            )
         )
 
-    # Adds customer, creates new ID, returns ID
-    def add_customer(self, createCustomerDTO: CreateCustomerDTO) -> int:
-        customers: list[Customer] = self.get_all_customers()
-        for singleCustomer in customers:
-            if createCustomerDTO.phone_number == singleCustomer.phone_number:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="phone_number_already_in_database!",
-                )
+        return new_id
 
-            if createCustomerDTO.driver_license_id == singleCustomer.driver_license_id:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="driver_licesnse_id_already_in_database",
-                )
+    # Deletes customer
+    async def delete_customer(self, customer_id: int) -> int:
+        customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
+        self._check_customer_blocked(customer=customer, customer_id=customer_id)
 
-        self.customer_repository.generalId += 1
-        newId: int = self.customer_repository.generalId
-
-        self.customer_repository.add_customer(
-            newId=newId, createCustomerDTO=createCustomerDTO
-        )
-        return newId
-
-    # Deletes customer, returns ID
-    def delete_customer(self, customer_id: int) -> int:
-        self.get_customer_by_id(customer_id)
-        self.customer_repository.delete_customer(customer_id=customer_id)
+        await self._customer_repository.delete_customer(customer_id=customer_id)
         return customer_id
 
-    # Updates customer, returns ID
-    def update_customer(
-        self, customer_id: int, updateCustomerDTO: UpdateCustomerDTO
+    # Updates customer
+    async def update_customer(
+        self, customer_id: int, update_customer_dto: UpdateCustomerDTO
     ) -> int:
+        customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
 
-        self.get_customer_by_id(customer_id)
-        customers: list[Customer] = self.get_all_customers()
+        customer.name = update_customer_dto.name
+        customer.last_name = update_customer_dto.last_name
+        customer.phone_number = update_customer_dto.phone_number
+        customer.driver_license_id = update_customer_dto.driver_license_id
 
-        for singleCustomer in customers:
-            if (
-                updateCustomerDTO.phone_number == singleCustomer.phone_number
-                and customer_id != singleCustomer.id
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="phone_number_already_in_database",
-                )
+        try:
+            await self._customer_repository.update_customer(
+                customer_id=customer_id, customer=customer
+            )
+            return customer_id
 
-            if (
-                updateCustomerDTO.driver_license_id == singleCustomer.driver_license_id
-                and customer_id != singleCustomer.id
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="driver_license_id_already_in_database",
-                )
+        except PhoneNumberInDatabaseException:
+            raise
 
-        self.customer_repository.update_customer(
-            customer_id=customer_id, updateCustomerDTO=updateCustomerDTO
+        except DriverLicenseInDatabaseException:
+            raise
+
+    # Blocks customer
+    async def block_customer(self, customer_id: int) -> int:
+        customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
+        self._check_customer_blocked(customer=customer, customer_id=customer_id)
+
+        await self._customer_repository.change_status_customer(
+            customer_id=customer_id, new_status=CustomerStatusEnum.BLOCKED.value
         )
         return customer_id
 
-    # Blocks customer, returns ID
-    def block_customer(self, customer_id: int) -> int:
-        customer: Customer = self.get_customer_by_id(customer_id)
+    # Unlocks customer
+    async def unlock_customer(self, customer_id: int) -> int:
+        customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
 
-        if customer.status != CustomerStatusEnum.BLOCKED:
-            self.customer_repository.block_customer(customer_id=customer_id)
-            return customer_id
+        if customer.status == CustomerStatusEnum.UNLOCKED:
+            raise CustomerAlreadyUnlockedException(customer_id=customer_id)
 
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="customer_already_blocked!",
+        await self._customer_repository.change_status_customer(
+            customer_id=customer_id, new_status=CustomerStatusEnum.UNLOCKED.value
         )
-
-    # Unlocks customer, returns ID
-    def unlock_customer(self, customer_id: int) -> int:
-        customer: Customer = self.get_customer_by_id(customer_id)
-
-        if customer.status != CustomerStatusEnum.UNLOCKED:
-            self.customer_repository.unlock_customer(customer_id=customer_id)
-            return customer_id
-
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="customer_cant_be_unlocked_when_is_active!",
-        )
+        return customer_id

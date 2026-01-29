@@ -14,7 +14,7 @@ class CustomerMapper:
             status=CustomerStatusEnum(customer_dict["status"]),
         )
 
-    @staticmethod  # Probably to delete
+    @staticmethod
     def customer_to_dict(customer: Customer) -> dict[str, str | int]:
         return {
             "id": customer.id,
