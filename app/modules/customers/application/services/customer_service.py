@@ -1,9 +1,5 @@
-from app.modules.customers.domain.enums.customer_status_enum import CustomerStatusEnum
 from app.modules.customers.domain.exceptions.customer_exceptions import (
-    CustomerAlreadyBlockedException,
     CustomerNotFoundException,
-    DriverLicenseInDatabaseException,
-    PhoneNumberInDatabaseException,
 )
 from app.modules.customers.domain.models.customer import Customer
 from app.modules.customers.domain.repositories.i_customer_repository import (
@@ -41,12 +37,10 @@ class CustomerService(ICustomerService):
     async def add_customer(self, create_customer_dto: CreateCustomerDTO) -> int:
         new_id: int = await self._customer_repository.add_customer(
             customer=Customer.create(
-                id=None,
                 name=create_customer_dto.name,
                 last_name=create_customer_dto.last_name,
                 phone_number=create_customer_dto.phone_number,
                 driver_license_id=create_customer_dto.driver_license_id,
-                status=CustomerStatusEnum.UNLOCKED,
             )
         )
 
@@ -55,8 +49,7 @@ class CustomerService(ICustomerService):
     # Deletes customer
     async def delete_customer(self, customer_id: int) -> int:
         customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
-        if customer.status == CustomerStatusEnum.BLOCKED:
-            raise CustomerAlreadyBlockedException(customer_id=customer_id)
+        customer.ensure_can_be_deleted()
 
         await self._customer_repository.delete_customer(customer_id=customer_id)
         return customer_id
@@ -74,17 +67,10 @@ class CustomerService(ICustomerService):
             driver_license_id=update_customer_dto.driver_license_id,
         )
 
-        try:
-            await self._customer_repository.update_customer(
-                customer_id=customer_id, customer=customer
-            )
-            return customer_id
-
-        except PhoneNumberInDatabaseException:
-            raise
-
-        except DriverLicenseInDatabaseException:
-            raise
+        await self._customer_repository.update_customer(
+            customer_id=customer_id, customer=customer
+        )
+        return customer_id
 
     # Blocks customer
     async def block_customer(self, customer_id: int) -> int:

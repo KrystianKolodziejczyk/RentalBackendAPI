@@ -32,20 +32,18 @@ class Customer:
     @classmethod
     def create(
         cls,
-        id: int | None,
         name: str,
         last_name: str,
         phone_number: str,
         driver_license_id: str,
-        status: CustomerStatusEnum,
     ) -> "Customer":
-        return Customer(
+        return cls(
             id=None,
             name=name,
             last_name=last_name,
             phone_number=phone_number,
             driver_license_id=driver_license_id,
-            status=status,
+            status=CustomerStatusEnum.UNLOCKED,
         )
 
     def update(
@@ -67,3 +65,7 @@ class Customer:
             raise CustomerAlreadyUnlockedException(self.id)
 
         self.status = CustomerStatusEnum.UNLOCKED
+
+    def ensure_can_be_deleted(self) -> None:
+        if self.status == CustomerStatusEnum.BLOCKED:
+            raise CustomerAlreadyBlockedException(self.id)

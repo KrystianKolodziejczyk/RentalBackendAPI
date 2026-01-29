@@ -1,6 +1,4 @@
-from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
 from app.modules.inventory.domain.exceptions.inventory_exceptions import (
-    CarAlreadyRentedException,
     CarNotFoundException,
 )
 from app.modules.inventory.domain.models.car import Car
@@ -27,11 +25,6 @@ class InventoryService(IInventoryService):
 
         return car
 
-    # Helper checks car rent
-    def _check_car_rent(self, car: Car) -> None:
-        if car.status == RentStatusEnum.RENTED:
-            raise CarAlreadyRentedException
-
     # Returns all cars
     async def get_all_cars(self) -> list[Car]:
         return await self._inventory_repository.get_all_cars()
@@ -47,8 +40,7 @@ class InventoryService(IInventoryService):
     # Adds new car
     async def add_car(self, create_car_dto: CreateCarDTO) -> int:
         new_id: int = await self._inventory_repository.add_car(
-            car=Car(
-                id=-1,
+            car=Car.create(
                 brand=create_car_dto.brand,
                 model=create_car_dto.model,
                 year=create_car_dto.year,
@@ -60,7 +52,7 @@ class InventoryService(IInventoryService):
     # Deletes car
     async def delete_car(self, car_id: int) -> int:
         car: Car = await self._get_car_and_check(car_id=car_id)
-        self._check_car_rent(car=car)
+        car.ensure_not_rented()
 
         await self._inventory_repository.delete_car(car_id=car_id)
         return car_id
@@ -68,12 +60,12 @@ class InventoryService(IInventoryService):
     # Updates car
     async def update_car(self, car_id: int, update_car_dto: UpdateCarDTO) -> int:
         car: Car = await self._get_car_and_check(car_id=car_id)
-        self._check_car_rent(car=car)
-
-        car.brand = update_car_dto.brand
-        car.model = update_car_dto.model
-        car.year = update_car_dto.year
-
+        car.ensure_not_rented()
+        car.update(
+            brand=update_car_dto.brand,
+            model=update_car_dto.model,
+            year=update_car_dto.year,
+        )
         await self._inventory_repository.update_car(car_id=car_id, car=car)
         return car_id
 
