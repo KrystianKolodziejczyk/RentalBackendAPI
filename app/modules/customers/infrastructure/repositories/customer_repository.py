@@ -123,13 +123,16 @@ class CustomerRepository(ICustomerRepository):
             self._return_exception(exception=e, customer_dict=customer_dict)
 
     # Changes customer status
-    async def change_status_customer(self, customer_id: int, new_status: str) -> int:
+    async def change_status_customer(self, customer_id: int, customer: Customer) -> int:
+        customer_dict: dict = CustomerMapper.customer_to_dict(customer=customer)
         query: str = """
         UPDATE customers
         SET status = ?
         WHERE id = ?;
         """
 
-        await self._db_client.execute(query=query, params=(new_status, customer_id))
+        await self._db_client.execute(
+            query=query, params=(customer_dict["status"], customer_id)
+        )
 
         return customer_id
