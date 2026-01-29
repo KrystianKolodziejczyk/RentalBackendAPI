@@ -3,14 +3,15 @@ from app.modules.customers.domain.exceptions.customer_exceptions import (
     CustomerAlreadyBlockedException,
     CustomerAlreadyUnlockedException,
 )
+from app.modules.customers.domain.value_objects import DriverLicenseId, PhoneNumber
 
 
 class Customer:
     id: int
     name: str
     last_name: str
-    phone_number: int
-    driver_license_id: str
+    phone_number: PhoneNumber
+    driver_license_id: DriverLicenseId
     status: CustomerStatusEnum
 
     def __init__(
@@ -18,9 +19,9 @@ class Customer:
         id: int,
         name: str,
         last_name: str,
-        phone_number: str,
+        phone_number: PhoneNumber,
         status: CustomerStatusEnum,
-        driver_license_id: str,
+        driver_license_id: DriverLicenseId,
     ) -> None:
         self.id = id
         self.name = name
@@ -34,8 +35,8 @@ class Customer:
         cls,
         name: str,
         last_name: str,
-        phone_number: str,
-        driver_license_id: str,
+        phone_number: PhoneNumber,
+        driver_license_id: DriverLicenseId,
     ) -> "Customer":
         return cls(
             id=None,
@@ -47,7 +48,11 @@ class Customer:
         )
 
     def update(
-        self, name: str, last_name: str, phone_number: str, driver_license_id: str
+        self,
+        name: str,
+        last_name: str,
+        phone_number: PhoneNumber,
+        driver_license_id: DriverLicenseId,
     ) -> None:
         self.name = name
         self.last_name = last_name

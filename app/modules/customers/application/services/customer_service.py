@@ -6,6 +6,7 @@ from app.modules.customers.domain.repositories.i_customer_repository import (
     ICustomerRepository,
 )
 from app.modules.customers.domain.services.i_customer_service import ICustomerService
+from app.modules.customers.domain.value_objects import DriverLicenseId, PhoneNumber
 from app.modules.customers.presentation.dto import CreateCustomerDTO, UpdateCustomerDTO
 
 
@@ -39,8 +40,10 @@ class CustomerService(ICustomerService):
             customer=Customer.create(
                 name=create_customer_dto.name,
                 last_name=create_customer_dto.last_name,
-                phone_number=create_customer_dto.phone_number,
-                driver_license_id=create_customer_dto.driver_license_id,
+                phone_number=PhoneNumber(value=create_customer_dto.phone_number),
+                driver_license_id=DriverLicenseId(
+                    value=create_customer_dto.driver_license_id
+                ),
             )
         )
 
@@ -63,8 +66,10 @@ class CustomerService(ICustomerService):
         customer.update(
             name=update_customer_dto.name,
             last_name=update_customer_dto.last_name,
-            phone_number=update_customer_dto.phone_number,
-            driver_license_id=update_customer_dto.driver_license_id,
+            phone_number=PhoneNumber(value=update_customer_dto.phone_number),
+            driver_license_id=DriverLicenseId(
+                value=update_customer_dto.driver_license_id
+            ),
         )
 
         await self._customer_repository.update_customer(

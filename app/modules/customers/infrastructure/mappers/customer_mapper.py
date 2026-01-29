@@ -1,5 +1,6 @@
 from app.modules.customers.domain.enums.customer_status_enum import CustomerStatusEnum
 from app.modules.customers.domain.models.customer import Customer
+from app.modules.customers.domain.value_objects import DriverLicenseId, PhoneNumber
 
 
 class CustomerMapper:
@@ -9,8 +10,8 @@ class CustomerMapper:
             id=customer_dict["id"],
             name=customer_dict["name"],
             last_name=customer_dict["last_name"],
-            phone_number=customer_dict["phone_number"],
-            driver_license_id=customer_dict["driver_license_id"],
+            phone_number=PhoneNumber(value=customer_dict["phone_number"]),
+            driver_license_id=DriverLicenseId(value=customer_dict["driver_license_id"]),
             status=CustomerStatusEnum(customer_dict["status"]),
         )
 
@@ -20,7 +21,7 @@ class CustomerMapper:
             "id": customer.id,
             "name": customer.name,
             "last_name": customer.last_name,
-            "phone_number": customer.phone_number,
-            "driver_license_id": customer.driver_license_id,
+            "phone_number": customer.phone_number.value,
+            "driver_license_id": customer.driver_license_id.value,
             "status": customer.status.value,
         }
