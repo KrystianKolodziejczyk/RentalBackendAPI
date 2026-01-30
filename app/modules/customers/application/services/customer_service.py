@@ -52,7 +52,7 @@ class CustomerService(ICustomerService):
     # Deletes customer
     async def delete_customer(self, customer_id: int) -> int:
         customer: Customer = await self._get_customer_and_check(customer_id=customer_id)
-        customer.ensure_can_be_deleted()
+        customer.ensure_not_blocked()
 
         await self._customer_repository.delete_customer(customer_id=customer_id)
         return customer_id

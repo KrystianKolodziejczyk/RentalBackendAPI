@@ -10,7 +10,7 @@ class RentalRepository(IRentalRepository):
     def __init__(self, db_client: ISqliteClient):
         self._db_client = db_client
 
-    async def get_rental_by_id(self, rental_id: int) -> Rental:
+    async def get_rental_by_id(self, rental_id: int) -> Rental | None:
         query: str = """
         SELECT * FROM rentals
         WHERE id = ?
@@ -20,6 +20,8 @@ class RentalRepository(IRentalRepository):
             query=query, params=(rental_id,)
         )
 
+        if rental_dict is None:
+            return None
         return RentalMapper.dict_to_rental(rental_dict=rental_dict)
 
     async def get_all_rentals(self) -> list[Rental]:
@@ -32,6 +34,18 @@ class RentalRepository(IRentalRepository):
         return [
             RentalMapper.dict_to_rental(one_rental) for one_rental in list_rental_dict
         ]
+
+    async def check_rental_id(self, car_id: int) -> int | None:
+        query: str = """SELECT id  FROM rentals WHERE car_id = ?"""
+
+        result_dict: dict = await self._db_client.fetch_one(
+            query=query, params=(car_id,)
+        )
+
+        if result_dict["id"] is None:
+            return None
+
+        return result_dict["id"]
 
     async def rent_car(self, rental: Rental) -> int:
         rental_dict: dict = RentalMapper.rental_to_dict(rental=rental)

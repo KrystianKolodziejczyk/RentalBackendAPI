@@ -42,9 +42,3 @@ class Rental:
             planned_end_date=planned_end_date,
             actual_end_date=actual_end_date,
         )
-
-    def rent_car(self, customer_id: int, car_id: int) -> None:
-        pass
-
-    def return_car(self, customer_id: int, car_id: int) -> None:
-        pass

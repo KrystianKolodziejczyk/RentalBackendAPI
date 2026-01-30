@@ -71,6 +71,6 @@ class Customer:
 
         self.status = CustomerStatusEnum.UNLOCKED
 
-    def ensure_can_be_deleted(self) -> None:
+    def ensure_not_blocked(self) -> None:
         if self.status == CustomerStatusEnum.BLOCKED:
             raise CustomerAlreadyBlockedException(self.id)

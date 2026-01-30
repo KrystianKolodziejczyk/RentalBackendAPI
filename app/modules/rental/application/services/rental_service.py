@@ -1,0 +1,86 @@
+from datetime import datetime, timezone
+
+from i_rental_service import IRentalService
+
+from app.modules.customers.domain.models.customer import Customer
+from app.modules.customers.domain.services.i_customer_service import ICustomerService
+from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
+from app.modules.inventory.domain.models.car import Car
+from app.modules.inventory.domain.services.i_inventory_service import IInventoryService
+from app.modules.rental.domain.models.rental import Rental
+from app.modules.rental.domain.rental_exceptions.rental_exceptions import (
+    RentalNotFoundException,
+)
+from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
+from app.modules.rental.presentation.dto.rent_car_dto import RentCarDto
+
+
+class RentalService(IRentalService):
+    _rental_repository: IRentalRepository
+    _customer_service: ICustomerService
+    _inventory_service: IInventoryService
+
+    def __init__(
+        self,
+        rental_repository: IRentalRepository,
+        customer_service: ICustomerService,
+        inventory_service: IInventoryService,
+    ) -> None:
+        self._rental_repository: IRentalRepository = rental_repository
+        self._customer_service: ICustomerService = customer_service
+        self._inventory_service: IInventoryService = inventory_service
+
+    async def get_rental_by_id(self, rental_id: int) -> Rental | None:
+        rental: Rental = await self._rental_repository.get_rental_by_id(
+            rental_id=rental_id
+        )
+
+        if rental is None:
+            raise RentalNotFoundException(rental_id=rental_id)
+
+        return rental
+
+    async def get_all_rentals(self) -> list[Rental]:
+        return await self._rental_repository.get_all_rentals()
+
+    async def check_rental_id(self, car_id: int) -> int | None:
+        rental_id: int | None = await self._rental_repository.check_rental_id(
+            car_id=car_id
+        )
+        if not rental_id:
+            raise RentalNotFoundException(rental_id=rental_id)
+
+        return rental_id
+
+    async def rent_car(self, rent_car_dto: RentCarDto) -> int:
+        car: Car = await self._inventory_service.get_car_by_id(
+            car_id=rent_car_dto.car_id
+        )
+        customer: Customer = await self._customer_service.get_customer_by_id(
+            customer_id=rent_car_dto.customer_id
+        )
+
+        car.ensure_not_rented()
+        customer.ensure_not_blocked()
+
+        rental = Rental.create(
+            customer_id=rent_car_dto.customer_id,
+            car_id=rent_car_dto.car_id,
+            start_date=rent_car_dto.start_date,
+            planned_end_date=rent_car_dto.planned_end_date,
+        )
+
+        car.change_status(new_status=RentStatusEnum.RENTED)
+
+        return await self._rental_repository.rent_car(rental=rental)
+
+    async def return_car(self, rental_id: int) -> int:
+        rental: Rental = await self._rental_repository.get_rental_by_id(
+            rental_id=rental_id
+        )
+
+        rental.actual_end_date = datetime.now(timezone.utc).timestamp()
+
+        car_id: int = await self._rental_repository.return_car(rental=rental)
+
+        return car_id

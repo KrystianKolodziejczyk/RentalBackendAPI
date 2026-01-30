@@ -21,3 +21,15 @@ class CarAlreadyRentedException(HTTPException):
         super().__init__(
             status_code=status.HTTP_409_CONFLICT, detail=f"Cant {action} rented car"
         )
+
+
+# =======================
+
+
+class CarIsNotRentedException(HTTPException):
+    def __init__(self, car_id: int, action: str):
+        self.car_id = car_id
+        self.action = action
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT, detail=f"Cant {action} available car"
+        )
