@@ -1,7 +1,3 @@
-from datetime import datetime, timezone
-
-from i_rental_service import IRentalService
-
 from app.modules.customers.domain.models.customer import Customer
 from app.modules.customers.domain.services.i_customer_service import ICustomerService
 from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
@@ -12,6 +8,7 @@ from app.modules.rental.domain.rental_exceptions.rental_exceptions import (
     RentalNotFoundException,
 )
 from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
+from app.modules.rental.domain.services.i_rental_service import IRentalService
 from app.modules.rental.presentation.dto.rent_car_dto import RentCarDto
 
 
@@ -52,6 +49,7 @@ class RentalService(IRentalService):
 
         return rental_id
 
+    # Returns rented car id
     async def rent_car(self, rent_car_dto: RentCarDto) -> int:
         car: Car = await self._inventory_service.get_car_by_id(
             car_id=rent_car_dto.car_id
@@ -71,16 +69,20 @@ class RentalService(IRentalService):
         )
 
         car.change_status(new_status=RentStatusEnum.RENTED)
+        await self._inventory_service.change_car_status(car=car)
 
         return await self._rental_repository.rent_car(rental=rental)
 
+    # Returns returned car id
     async def return_car(self, rental_id: int) -> int:
         rental: Rental = await self._rental_repository.get_rental_by_id(
             rental_id=rental_id
         )
-
-        rental.actual_end_date = datetime.now(timezone.utc).timestamp()
+        car: Car = await self._inventory_service.get_car_by_id(car_id=rental.car_id)
+        car.ensure_rented()
+        rental.complete_return()
 
         car_id: int = await self._rental_repository.return_car(rental=rental)
+        await self._inventory_service.change_car_status(car=car)
 
         return car_id

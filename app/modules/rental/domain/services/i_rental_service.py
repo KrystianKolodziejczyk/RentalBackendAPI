@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
 
 from app.modules.rental.domain.models.rental import Rental
+from app.modules.rental.presentation.dto.rent_car_dto import RentCarDto
 
 
 class IRentalService(ABC):
@@ -15,7 +15,7 @@ class IRentalService(ABC):
     async def check_rental_id(self, car_id: int) -> int | None: ...
 
     @abstractmethod
-    async def rent_car(self, customer_id: int, car_id: int) -> int: ...
+    async def rent_car(self, rent_car_dto: RentCarDto) -> int: ...
 
     @abstractmethod
-    async def return_car(self, car_id: int, return_timestamp: datetime) -> int: ...
+    async def return_car(self, rental_id: int) -> int: ...

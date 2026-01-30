@@ -35,8 +35,11 @@ class RentalRepository(IRentalRepository):
             RentalMapper.dict_to_rental(one_rental) for one_rental in list_rental_dict
         ]
 
+    # Returns searched rental id
     async def check_rental_id(self, car_id: int) -> int | None:
-        query: str = """SELECT id  FROM rentals WHERE car_id = ?"""
+        query: str = """SELECT id
+            FROM rentals
+            WHERE car_id = ? AND acutal_end_date = Null"""
 
         result_dict: dict = await self._db_client.fetch_one(
             query=query, params=(car_id,)
@@ -47,10 +50,11 @@ class RentalRepository(IRentalRepository):
 
         return result_dict["id"]
 
+    # Returns created new rental id
     async def rent_car(self, rental: Rental) -> int:
         rental_dict: dict = RentalMapper.rental_to_dict(rental=rental)
         query: str = """
-        INSERT INTO (customer_id, car_id, start_date, planned_end_date)
+        INSERT INTO rentals (customer_id, car_id, start_date, planned_end_date)
         VALUES (?, ?, ?, ?)
         """
 
@@ -66,21 +70,18 @@ class RentalRepository(IRentalRepository):
 
         return new_id
 
+    # Returns returned car id
     async def return_car(self, rental: Rental) -> int:
         rental_dict: dict = RentalMapper.rental_to_dict(rental=rental)
         query: str = """
         UPDATE rentals
         SET actual_end_date = ?
-        WHERE customer_id = ? AND car_id = ?
+        WHERE id = ?
         """
 
         await self._db_client.execute(
             query=query,
-            params=(
-                rental_dict["actual_end_date"],
-                rental_dict["customer_id"],
-                rental_dict["car_id"],
-            ),
+            params=(rental_dict["actual_end_date"], rental_dict["id"]),
         )
 
         return rental_dict["car_id"]

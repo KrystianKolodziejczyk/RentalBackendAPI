@@ -1,3 +1,6 @@
+from datetime import datetime, timezone
+
+
 class Rental:
     id: int
     customer_id: int
@@ -33,6 +36,7 @@ class Rental:
         start_date: str,
         planned_end_date: str,
         actual_end_date: str | None = None,
+        created_at: datetime = datetime.now(timezone.utc).timestamp(),
     ) -> "Rental":
         return cls(
             id=None,
@@ -41,4 +45,8 @@ class Rental:
             start_date=start_date,
             planned_end_date=planned_end_date,
             actual_end_date=actual_end_date,
+            created_at=created_at,
         )
+
+    def complete_return(self) -> None:
+        self.actual_end_date = datetime.now(timezone.utc).timestamp()

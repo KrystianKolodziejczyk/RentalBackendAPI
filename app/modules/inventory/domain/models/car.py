@@ -1,6 +1,7 @@
 from app.modules.inventory.domain.enums.rent_status_enum import RentStatusEnum
 from app.modules.inventory.domain.exceptions.inventory_exceptions import (
     CarAlreadyRentedException,
+    CarIsNotRentedException,
 )
 
 
@@ -34,11 +35,9 @@ class Car:
         if self.status == RentStatusEnum.RENTED:
             raise CarAlreadyRentedException(self.id)
 
-    """
     def ensure_rented(self) -> None:
         if self.status == RentStatusEnum.AVAILABLE:
             raise CarIsNotRentedException
-    """
 
     def update(self, brand: str, model: str, year: int) -> None:
         self.brand = brand

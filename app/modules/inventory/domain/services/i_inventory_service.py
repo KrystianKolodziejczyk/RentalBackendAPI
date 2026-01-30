@@ -28,3 +28,6 @@ class IInventoryService(ABC):
 
     @abstractmethod
     async def check_car_status(self, car_id: int) -> str: ...
+
+    @abstractmethod
+    async def change_car_status(self, car: Car) -> int: ...

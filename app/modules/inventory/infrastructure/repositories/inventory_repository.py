@@ -50,15 +50,40 @@ class InventoryRepository(IInventoryRepository):
         await self._db_client.execute(query=query, params=(car_id,))
 
     # Updates car in DB
-    async def update_car(self, car_id: int, car: Car) -> None:
-        query: str = "UPDATE cars SET brand = ?, model = ?, year = ? WHERE id = ?"
+    async def update_car(self, car: Car) -> None:
         car_dict: dict = CarMapper.car_to_dict(car=car)
+        query: str = """
+        UPDATE cars
+        SET brand = ?,
+        model = ?,
+        year = ?
+        WHERE id = ?
+        """
+
         await self._db_client.execute(
             query=query,
-            params=(car_dict["brand"], car_dict["model"], car_dict["year"], car_id),
+            params=(
+                car_dict["brand"],
+                car_dict["model"],
+                car_dict["year"],
+                car_dict["id"],
+            ),
         )
 
     async def get_available_cars(self) -> list[Car]:
         query: str = "SELECT * FROM cars WHERE status = 'available'"
         list_car_dict: list[dict] = await self._db_client.fetch_all(query=query)
         return [CarMapper.dict_to_car(car_dict) for car_dict in list_car_dict]
+
+    async def save_status(self, car: Car) -> int:
+        car_dict: dict = CarMapper.car_to_dict(car=car)
+        query: str = """
+        UPDATE cars
+        SET status = ?
+        WHERE id = ?
+        """
+
+        await self._db_client.execute(
+            query=query, params=(car_dict["status"], car_dict["id"])
+        )
+        return car_dict["id"]

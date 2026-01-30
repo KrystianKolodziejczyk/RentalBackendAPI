@@ -77,3 +77,6 @@ class InventoryService(IInventoryService):
     async def check_car_status(self, car_id: int) -> str:
         car: Car = await self._get_car_and_check(car_id=car_id)
         return car.status.value
+
+    async def change_car_status(self, car: Car) -> int:
+        await self._inventory_repository.save_status(car=car)
