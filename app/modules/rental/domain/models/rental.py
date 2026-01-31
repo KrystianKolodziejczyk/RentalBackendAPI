@@ -55,4 +55,4 @@ class Rental:
         if self.actual_end_date is not None:
             raise RentalAlreadyReturnedException(self.id)
 
-        self.actual_end_date = datetime.now(timezone.utc).isoformat()
+        self.actual_end_date = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
