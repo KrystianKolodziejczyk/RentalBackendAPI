@@ -31,13 +31,13 @@ class Car:
             status=RentStatusEnum.AVAILABLE,
         )
 
-    def ensure_not_rented(self) -> None:
+    def ensure_available(self, action: str) -> None:
         if self.status == RentStatusEnum.RENTED:
-            raise CarAlreadyRentedException(self.id)
+            raise CarAlreadyRentedException(self.id, action=action)
 
-    def ensure_rented(self) -> None:
+    def ensure_rented(self, action: str) -> None:
         if self.status == RentStatusEnum.AVAILABLE:
-            raise CarIsNotRentedException
+            raise CarIsNotRentedException(car_id=self.id, action=action)
 
     def update(self, brand: str, model: str, year: int) -> None:
         self.brand = brand

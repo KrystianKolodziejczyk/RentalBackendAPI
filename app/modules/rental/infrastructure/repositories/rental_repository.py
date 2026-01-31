@@ -37,9 +37,11 @@ class RentalRepository(IRentalRepository):
 
     # Returns searched rental id
     async def check_rental_id(self, car_id: int) -> int | None:
-        query: str = """SELECT id
-            FROM rentals
-            WHERE car_id = ? AND acutal_end_date = Null"""
+        query: str = """
+        SELECT id
+        FROM rentals
+        WHERE car_id = ? AND acutal_end_date IS NULL
+        """
 
         result_dict: dict = await self._db_client.fetch_one(
             query=query, params=(car_id,)
@@ -58,7 +60,7 @@ class RentalRepository(IRentalRepository):
         VALUES (?, ?, ?, ?)
         """
 
-        new_id: int = await self._db_client.execute(
+        await self._db_client.execute(
             query=query,
             params=(
                 rental_dict["customer_id"],
@@ -68,7 +70,7 @@ class RentalRepository(IRentalRepository):
             ),
         )
 
-        return new_id
+        return rental_dict["car_id"]
 
     # Returns returned car id
     async def return_car(self, rental: Rental) -> int:

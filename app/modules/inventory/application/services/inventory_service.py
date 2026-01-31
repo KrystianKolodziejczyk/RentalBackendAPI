@@ -52,7 +52,7 @@ class InventoryService(IInventoryService):
     # Deletes car
     async def delete_car(self, car_id: int) -> int:
         car: Car = await self._get_car_and_check(car_id=car_id)
-        car.ensure_not_rented()
+        car.ensure_available(action="delete")
 
         await self._inventory_repository.delete_car(car_id=car_id)
         return car_id
@@ -60,7 +60,7 @@ class InventoryService(IInventoryService):
     # Updates car
     async def update_car(self, car_id: int, update_car_dto: UpdateCarDTO) -> int:
         car: Car = await self._get_car_and_check(car_id=car_id)
-        car.ensure_not_rented()
+        car.ensure_available(action="update")
         car.update(
             brand=update_car_dto.brand,
             model=update_car_dto.model,
@@ -78,5 +78,6 @@ class InventoryService(IInventoryService):
         car: Car = await self._get_car_and_check(car_id=car_id)
         return car.status.value
 
+    # Called only by rental service
     async def change_car_status(self, car: Car) -> int:
         await self._inventory_repository.save_status(car=car)

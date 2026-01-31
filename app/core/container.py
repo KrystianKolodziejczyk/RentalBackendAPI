@@ -20,6 +20,12 @@ from app.modules.inventory.domain.services.i_inventory_service import (
 from app.modules.inventory.infrastructure.repositories.inventory_repository import (
     InventoryRepository,
 )
+from app.modules.rental.application.services.rental_service import RentalService
+from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
+from app.modules.rental.domain.services.i_rental_service import IRentalService
+from app.modules.rental.infrastructure.repositories.rental_repository import (
+    RentalRepository,
+)
 from app.shared.domain.services.i_sqlite_client.i_sqlite_client import ISqliteClient
 from app.shared.infrastructure.services.sqlite_client.sqlite_client import SqliteClient
 from app.shared.infrastructure.services.storage_ensure.storage_ensure import (
@@ -33,9 +39,7 @@ _db_client: ISqliteClient = SqliteClient(
 # ====== Inventory =======
 
 
-_inventory_repository: IInventoryRepository = InventoryRepository(
-    db_client=_db_client
-)
+_inventory_repository: IInventoryRepository = InventoryRepository(db_client=_db_client)
 _inventory_service: IInventoryService = InventoryService(
     inventory_repository=_inventory_repository
 )
@@ -49,6 +53,16 @@ _customer_service: ICustomerService = CustomerService(
     customer_repository=_customer_repository
 )
 
+# ======= Rental =========
+
+_rental_repository: IRentalRepository = RentalRepository(db_client=_db_client)
+
+_rental_service: IRentalService = RentalService(
+    rental_repository=_rental_repository,
+    customer_service=_customer_service,
+    inventory_service=_inventory_service,
+)
+
 
 # ======= Getters ========
 
@@ -59,3 +73,7 @@ def get_inventory_service() -> InventoryService:
 
 def get_customer_service() -> CustomerService:
     return _customer_service
+
+
+def get_rental_service() -> RentalService:
+    return _rental_service

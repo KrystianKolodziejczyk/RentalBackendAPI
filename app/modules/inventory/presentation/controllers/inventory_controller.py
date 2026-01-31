@@ -17,7 +17,7 @@ from app.modules.inventory.presentation.response import (
 
 router = APIRouter()
 
-# ===== Inventory Controller =======
+# ==== Inventory Controller =====
 
 # ===============================
 

@@ -1,5 +1,9 @@
 from datetime import datetime, timezone
 
+from app.modules.rental.domain.rental_exceptions.rental_exceptions import (
+    RentalAlreadyReturnedException,
+)
+
 
 class Rental:
     id: int
@@ -8,7 +12,7 @@ class Rental:
     start_date: str
     planned_end_date: str
     actual_end_date: str | None
-    created_at: str
+    created_at: str | None
 
     def __init__(
         self,
@@ -18,7 +22,7 @@ class Rental:
         start_date: str,
         planned_end_date: str,
         actual_end_date: str | None,
-        created_at: str,
+        created_at: str | None,
     ) -> None:
         self.id = id
         self.customer_id = customer_id
@@ -36,7 +40,6 @@ class Rental:
         start_date: str,
         planned_end_date: str,
         actual_end_date: str | None = None,
-        created_at: datetime = datetime.now(timezone.utc).timestamp(),
     ) -> "Rental":
         return cls(
             id=None,
@@ -45,8 +48,11 @@ class Rental:
             start_date=start_date,
             planned_end_date=planned_end_date,
             actual_end_date=actual_end_date,
-            created_at=created_at,
+            created_at=None,
         )
 
     def complete_return(self) -> None:
-        self.actual_end_date = datetime.now(timezone.utc).timestamp()
+        if self.actual_end_date is not None:
+            raise RentalAlreadyReturnedException(self.id)
+
+        self.actual_end_date = datetime.now(timezone.utc).isoformat()

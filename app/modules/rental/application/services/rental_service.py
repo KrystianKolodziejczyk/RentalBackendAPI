@@ -58,7 +58,7 @@ class RentalService(IRentalService):
             customer_id=rent_car_dto.customer_id
         )
 
-        car.ensure_not_rented()
+        car.ensure_available(action="rent")
         customer.ensure_not_blocked()
 
         rental = Rental.create(
@@ -79,10 +79,12 @@ class RentalService(IRentalService):
             rental_id=rental_id
         )
         car: Car = await self._inventory_service.get_car_by_id(car_id=rental.car_id)
-        car.ensure_rented()
+        car.ensure_rented(action="return")
         rental.complete_return()
 
         car_id: int = await self._rental_repository.return_car(rental=rental)
+
+        car.change_status(new_status=RentStatusEnum.AVAILABLE)
         await self._inventory_service.change_car_status(car=car)
 
         return car_id
