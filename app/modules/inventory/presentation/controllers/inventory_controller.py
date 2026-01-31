@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/cars/all", status_code=status.HTTP_200_OK, response_model=list[GetCarResponse]
+    "/cars", status_code=status.HTTP_200_OK, response_model=list[GetCarResponse]
 )
 async def get_all_cars(
     inventory_service: IInventoryService = Depends(get_inventory_service),
@@ -35,7 +35,7 @@ async def get_all_cars(
 
 
 @router.get(
-    "/cars/all/count",
+    "/cars/count",
     status_code=status.HTTP_200_OK,
     response_model=CarsQtyResponse,
 )
@@ -50,7 +50,7 @@ async def get_all_cars_qty(
 
 
 @router.get(
-    "/cars/all/{car_id}",
+    "/cars/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=GetCarResponse,
 )
@@ -64,7 +64,7 @@ async def get_one_car(
 
 
 @router.post(
-    "/cars/all",
+    "/cars",
     status_code=status.HTTP_201_CREATED,
     response_model=CreateCarResponse,
 )
@@ -80,7 +80,7 @@ async def add_new_car(
 
 
 @router.delete(
-    "/cars/all/{car_id}",
+    "/cars/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=DeleteCarResponse,
 )
@@ -95,7 +95,7 @@ async def delete_car(
 
 
 @router.put(
-    "/cars/all/{car_id}",
+    "/cars/{car_id}",
     status_code=status.HTTP_200_OK,
     response_model=UpdateCarResponse,
 )

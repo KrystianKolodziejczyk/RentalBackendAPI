@@ -28,15 +28,17 @@ class RentalService(IRentalService):
         self._customer_service: ICustomerService = customer_service
         self._inventory_service: IInventoryService = inventory_service
 
-    async def get_rental_by_id(self, rental_id: int) -> Rental | None:
+    # Helper gets rental and checks existence
+    async def _get_rental_and_check(self, rental_id: int) -> Rental:
         rental: Rental = await self._rental_repository.get_rental_by_id(
             rental_id=rental_id
         )
-
         if rental is None:
             raise RentalNotFoundException(rental_id=rental_id)
-
         return rental
+
+    async def get_rental_by_id(self, rental_id: int) -> Rental:
+        return await self._get_rental_and_check(rental_id=rental_id)
 
     async def get_all_rentals(self) -> list[Rental]:
         return await self._rental_repository.get_all_rentals()
@@ -86,6 +88,6 @@ class RentalService(IRentalService):
         rentals: list[Rental] = await self._rental_repository.get_active_rentals()
 
         if not rentals:
-            raise ActiveRentalsNotFoundException
+            raise ActiveRentalsNotFoundException()
 
         return rentals

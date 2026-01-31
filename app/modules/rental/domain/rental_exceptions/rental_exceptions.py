@@ -8,7 +8,7 @@ class RentalNotFoundException(HTTPException):
         self.rental_id = rental_id
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Rental {rental_id} doesn't exists",
+            detail=f"Rental {rental_id} doesn't exist",
         )
 
 
@@ -31,5 +31,5 @@ class ActiveRentalsNotFoundException(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="There is no active rentals now",
+            detail="There are no active rentals",
         )

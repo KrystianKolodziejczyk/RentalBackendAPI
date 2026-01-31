@@ -81,3 +81,4 @@ class InventoryService(IInventoryService):
     # Called only by rental service
     async def change_car_status(self, car: Car) -> int:
         await self._inventory_repository.save_status(car=car)
+        return car.id
