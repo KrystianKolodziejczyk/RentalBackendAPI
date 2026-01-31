@@ -35,23 +35,6 @@ class RentalRepository(IRentalRepository):
             RentalMapper.dict_to_rental(one_rental) for one_rental in list_rental_dict
         ]
 
-    # Returns searched rental id
-    async def check_rental_id(self, car_id: int) -> int | None:
-        query: str = """
-        SELECT id
-        FROM rentals
-        WHERE car_id = ? AND acutal_end_date IS NULL
-        """
-
-        result_dict: dict = await self._db_client.fetch_one(
-            query=query, params=(car_id,)
-        )
-
-        if result_dict["id"] is None:
-            return None
-
-        return result_dict["id"]
-
     # Returns created new rental id
     async def rent_car(self, rental: Rental) -> int:
         rental_dict: dict = RentalMapper.rental_to_dict(rental=rental)
@@ -87,3 +70,19 @@ class RentalRepository(IRentalRepository):
         )
 
         return rental_dict["car_id"]
+
+    async def get_active_rentals(self) -> list[Rental] | None:
+        query: str = """
+        SELECT *
+        FROM rentals
+        WHERE actual_end_date IS NULL;
+        """
+
+        list_rental_dict: list[dict] = await self._db_client.fetch_all(query=query)
+
+        if list_rental_dict is None:
+            return None
+
+        return [
+            RentalMapper.dict_to_rental(one_rental) for one_rental in list_rental_dict
+        ]

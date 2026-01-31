@@ -29,6 +29,20 @@ async def get_all_rental(
 # ==============================
 
 
+@router.get(
+    "/rental/active",
+    status_code=status.HTTP_200_OK,
+    response_model=list[GetRentalResponse],
+)
+async def get_active_rentals(
+    rental_service: IRentalService = Depends(get_rental_service),
+) -> list[GetRentalResponse]:
+    return await rental_service.get_active_rentals()
+
+
+# ==============================
+
+
 @router.post(
     "/rental/rent", status_code=status.HTTP_201_CREATED, response_model=RentCarResponse
 )

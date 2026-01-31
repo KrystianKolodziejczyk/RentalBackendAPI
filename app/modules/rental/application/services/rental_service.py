@@ -5,6 +5,7 @@ from app.modules.inventory.domain.models.car import Car
 from app.modules.inventory.domain.services.i_inventory_service import IInventoryService
 from app.modules.rental.domain.models.rental import Rental
 from app.modules.rental.domain.rental_exceptions.rental_exceptions import (
+    ActiveRentalsNotFoundException,
     RentalNotFoundException,
 )
 from app.modules.rental.domain.repositories.i_rental_repository import IRentalRepository
@@ -39,15 +40,6 @@ class RentalService(IRentalService):
 
     async def get_all_rentals(self) -> list[Rental]:
         return await self._rental_repository.get_all_rentals()
-
-    async def check_rental_id(self, car_id: int) -> int | None:
-        rental_id: int | None = await self._rental_repository.check_rental_id(
-            car_id=car_id
-        )
-        if not rental_id:
-            raise RentalNotFoundException(rental_id=rental_id)
-
-        return rental_id
 
     # Returns rented car id
     async def rent_car(self, rent_car_dto: RentCarDto) -> int:
@@ -88,3 +80,12 @@ class RentalService(IRentalService):
         await self._inventory_service.change_car_status(car=car)
 
         return car_id
+
+    # Returns only active rentals
+    async def get_active_rentals(self) -> list[Rental] | None:
+        rentals: list[Rental] = await self._rental_repository.get_active_rentals()
+
+        if not rentals:
+            raise ActiveRentalsNotFoundException
+
+        return rentals
